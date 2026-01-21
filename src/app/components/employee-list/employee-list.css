@@ -1,0 +1,86 @@
+/* Employee List Component Styles */
+
+.employee-section {
+  max-width: 1000px;
+  margin: 20px auto;
+  padding: 0 20px;
+}
+
+.section-title {
+  color: #333;
+  font-size: 1.4rem;
+  font-weight: bold;
+  margin-bottom: 20px;
+  border-bottom: 1px solid #ddd;
+  padding-bottom: 10px;
+}
+
+.employee-container {
+  margin-top: 20px;
+}
+
+.employee-list {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.employee-card {
+  background: white;
+  border: 1px solid #ddd;
+  padding: 15px;
+  border-radius: 4px;
+}
+
+.employee-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 10px;
+}
+
+.employee-name {
+  margin: 0;
+  color: #333;
+  font-size: 1.1rem;
+  font-weight: bold;
+}
+
+.employee-id {
+  background-color: #f0f0f0;
+  color: #333;
+  padding: 3px 8px;
+  border-radius: 3px;
+  font-size: 0.85rem;
+}
+
+.employee-details {
+  color: #555;
+  font-size: 0.95rem;
+}
+
+.employee-details p {
+  margin: 5px 0;
+  line-height: 1.4;
+}
+
+.employee-details strong {
+  color: #333;
+  font-weight: bold;
+}
+
+.no-employees {
+  background-color: #f9f9f9;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  padding: 30px;
+  text-align: center;
+  color: #999;
+}
+
+.no-employees p {
+  margin: 0;
+  font-size: 1rem;
+}

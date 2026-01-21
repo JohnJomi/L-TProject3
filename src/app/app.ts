@@ -1,12 +1,12 @@
-import { Component, signal } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
+import { Component } from '@angular/core';
+import { Navbar } from './components/navbar/navbar';
+import { EmployeeList } from './components/employee-list/employee-list';
+
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet],
+  standalone: true,
+  imports: [Navbar, EmployeeList],
   templateUrl: './app.html',
-  styleUrl: './app.css'
 })
-export class App {
-  protected readonly title = signal('employee-management-dashboard');
-}
+export class App {}

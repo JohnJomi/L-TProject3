@@ -1,0 +1,25 @@
+<section class="employee-section">
+  <h2 class="section-title">Employees</h2>
+
+  <div *ngIf="employees.length > 0; else noEmployees" class="employee-container">
+    <div class="employee-list">
+      <div *ngFor="let emp of employees" class="employee-card">
+        <div class="employee-header">
+          <h3 class="employee-name">{{ emp.name }}</h3>
+          <span class="employee-id">#{{ emp.id }}</span>
+        </div>
+        <div class="employee-details">
+          <p><strong>Role:</strong> {{ emp.role }}</p>
+          <p><strong>Department:</strong> {{ emp.department }}</p>
+          <p><strong>Salary:</strong> ${{ emp.salary | number }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <ng-template #noEmployees>
+    <div class="no-employees">
+      <p>No employees available</p>
+    </div>
+  </ng-template>
+</section>
