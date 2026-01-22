@@ -48,11 +48,11 @@ export class App {}
 ```
 
 **Benefits:**
-- ✅ Clear dependency management
-- ✅ No hidden imports in NgModule
-- ✅ Easier to understand component relationships
-- ✅ Better tree-shaking for production builds
-- ✅ Closer to modern JavaScript module patterns
+-  Clear dependency management
+-  No hidden imports in NgModule
+-  Easier to understand component relationships
+-  Better tree-shaking for production builds
+-  Closer to modern JavaScript module patterns
 
 ### 2. Component Composition Pattern
 

@@ -1,6 +1,16 @@
 <nav class="navbar">
   <div class="navbar-container">
-    <h1 class="navbar-title">Employee Management Dashboard</h1>
-    <p class="navbar-subtitle">Manage employees</p>
+    <div class="navbar-content">
+      <div class="navbar-title-section">
+        <h1 class="navbar-title">Employee Management Dashboard</h1>
+        <p class="navbar-subtitle">Manage employees</p>
+      </div>
+      <div class="navbar-actions">
+        <button class="nav-btn" (click)="toggleAddForm()" title="Add new employee">
+          ➕ Add Employee
+        </button>
+      </div>
+    </div>
   </div>
 </nav>
+
