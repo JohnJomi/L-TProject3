@@ -1,17 +1,75 @@
 <section class="employee-section">
   <h2 class="section-title">Employees</h2>
 
+  <!-- Add Employee Form -->
+  <div *ngIf="showAddForm" class="form-container">
+    <h3>Add New Employee</h3>
+    <form (ngSubmit)="addEmployee()" class="employee-form">
+      <div class="form-group">
+        <label>Name:</label>
+        <input type="text" [(ngModel)]="formData.name" name="name" placeholder="Enter name" required>
+      </div>
+      <div class="form-group">
+        <label>Role:</label>
+        <input type="text" [(ngModel)]="formData.role" name="role" placeholder="Enter role" required>
+      </div>
+      <div class="form-group">
+        <label>Department:</label>
+        <input type="text" [(ngModel)]="formData.department" name="department" placeholder="Enter department" required>
+      </div>
+      <div class="form-group">
+        <label>Salary:</label>
+        <input type="number" [(ngModel)]="formData.salary" name="salary" placeholder="Enter salary" required>
+      </div>
+      <button type="submit" class="btn btn-success">Add Employee</button>
+    </form>
+  </div>
+
   <div *ngIf="employees.length > 0; else noEmployees" class="employee-container">
     <div class="employee-list">
       <div *ngFor="let emp of employees" class="employee-card">
-        <div class="employee-header">
-          <h3 class="employee-name">{{ emp.name }}</h3>
-          <span class="employee-id">#{{ emp.id }}</span>
+        <!-- Edit Form -->
+        <div *ngIf="editingId === emp.id" class="edit-form">
+          <h4>Edit Employee</h4>
+          <form class="employee-form">
+            <div class="form-group">
+              <label>Name:</label>
+              <input type="text" [(ngModel)]="formData.name" name="name" placeholder="Enter name">
+            </div>
+            <div class="form-group">
+              <label>Role:</label>
+              <input type="text" [(ngModel)]="formData.role" name="role" placeholder="Enter role">
+            </div>
+            <div class="form-group">
+              <label>Department:</label>
+              <input type="text" [(ngModel)]="formData.department" name="department" placeholder="Enter department">
+            </div>
+            <div class="form-group">
+              <label>Salary:</label>
+              <input type="number" [(ngModel)]="formData.salary" name="salary" placeholder="Enter salary">
+            </div>
+            <div class="form-actions">
+              <button type="button" (click)="saveEdit(emp.id)" class="btn btn-success">Save</button>
+              <button type="button" (click)="cancelEdit()" class="btn btn-secondary">Cancel</button>
+            </div>
+          </form>
         </div>
-        <div class="employee-details">
-          <p><strong>Role:</strong> {{ emp.role }}</p>
-          <p><strong>Department:</strong> {{ emp.department }}</p>
-          <p><strong>Salary:</strong> ${{ emp.salary | number }}</p>
+
+        <!-- Display View -->
+        <div *ngIf="editingId !== emp.id" class="employee-display">
+          <div class="employee-header">
+            <h3 class="employee-name">{{ emp.name }}</h3>
+            <span class="employee-id">#{{ emp.id }}</span>
+          </div>
+          <div class="employee-details">
+            <p><strong>Role:</strong> {{ emp.role }}</p>
+            <p><strong>Department:</strong> {{ emp.department }}</p>
+            <p><strong>Salary:</strong> ${{ emp.salary | number }}</p>
+          </div>
+          <div class="employee-actions">
+            <button class="btn btn-edit" (click)="startEdit(emp)">Edit</button>
+            <button class="btn btn-delete" (click)="deleteEmployee(emp.id)">Delete</button>
+          </div>
         </div>
       </div>
     </div>
@@ -23,3 +81,4 @@
     </div>
   </ng-template>
 </section>
+
