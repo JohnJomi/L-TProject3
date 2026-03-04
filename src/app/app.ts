@@ -1,12 +1,11 @@
 import { Component } from '@angular/core';
-import { Navbar } from './components/navbar/navbar';
+import { NavbarComponent } from './components/navbar/navbar.component';
 import { EmployeeList } from './components/employee-list/employee-list';
-
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [Navbar, EmployeeList],
+  imports: [NavbarComponent, EmployeeList],
   templateUrl: './app.html',
 })
-export class App {}
+export class App { }

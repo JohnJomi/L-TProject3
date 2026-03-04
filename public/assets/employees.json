@@ -1,0 +1,23 @@
+[
+    {
+        "id": 1,
+        "name": "Alice Johnson",
+        "role": "Software Engineer",
+        "department": "Engineering",
+        "salary": 95000
+    },
+    {
+        "id": 2,
+        "name": "Bob Smith",
+        "role": "Product Manager",
+        "department": "Product",
+        "salary": 110000
+    },
+    {
+        "id": 3,
+        "name": "Charlie Davis",
+        "role": "UX Designer",
+        "department": "Design",
+        "salary": 85000
+    }
+]
