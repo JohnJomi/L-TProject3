@@ -2,6 +2,7 @@
     {
         "id": 1,
         "name": "Alice Johnson",
+        "email": "alice.johnson@company.com",
         "role": "Software Engineer",
         "department": "Engineering",
         "salary": 95000
@@ -9,6 +10,7 @@
     {
         "id": 2,
         "name": "Bob Smith",
+        "email": "bob.smith@company.com",
         "role": "Product Manager",
         "department": "Product",
         "salary": 110000
@@ -16,6 +18,7 @@
     {
         "id": 3,
         "name": "Charlie Davis",
+        "email": "charlie.davis@company.com",
         "role": "UX Designer",
         "department": "Design",
         "salary": 85000

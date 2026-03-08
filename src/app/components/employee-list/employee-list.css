@@ -4,31 +4,99 @@
   margin: 0 auto;
 }
 
-.header-actions {
+/* Toolbar — filter input + add button */
+.toolbar {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 24px;
+  gap: 16px;
+  flex-wrap: wrap;
 }
 
 .filter-field {
   width: 300px;
+  min-width: 200px;
 }
 
 .form-wrapper {
   margin-bottom: 24px;
 }
 
-.table-container {
-  overflow-x: auto;
+/* Employee cards — responsive grid */
+.employee-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 20px;
+}
+
+.employee-card {
+  border: 1px solid #ddd;
+  padding: 16px;
   border-radius: 8px;
+  background: #fff;
+  transition: box-shadow 0.2s ease;
 }
 
-table {
-  width: 100%;
+.employee-card:hover {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
 }
 
-.mat-column-actions {
-  width: 120px;
-  text-align: right;
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 12px;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 10px;
+}
+
+.card-title h3 {
+  margin: 0 0 4px 0;
+  font-size: 1.1rem;
+  color: #333;
+}
+
+.employee-id {
+  font-size: 0.8rem;
+  color: #888;
+  background: #f5f5f5;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.card-actions {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  flex-shrink: 0;
+}
+
+.card-body p {
+  margin: 6px 0;
+  font-size: 0.9rem;
+  color: #555;
+  line-height: 1.5;
+}
+
+.card-body strong {
+  color: #333;
+}
+
+/* Loading and empty states */
+.loading-message {
+  text-align: center;
+  padding: 40px 20px;
+  color: #666;
+  font-size: 1rem;
+}
+
+.no-data {
+  text-align: center;
+  padding: 30px;
+  color: #999;
+  grid-column: 1 / -1;
+  background: #f9f9f9;
+  border-radius: 8px;
+  border: 1px solid #ddd;
 }

@@ -2,6 +2,7 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatTableModule } from '@angular/material/table';
+import { MatSortModule } from '@angular/material/sort';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
@@ -23,6 +24,7 @@ import { EmployeeDetail } from '../employee-detail/employee-detail';
     DepartmentFilterPipe,
     HighlightSalaryDirective,
     MatTableModule,
+    MatSortModule,
     MatButtonModule,
     MatIconModule,
     MatInputModule,
@@ -34,20 +36,22 @@ import { EmployeeDetail } from '../employee-detail/employee-detail';
   styleUrl: './employee-list.css',
 })
 export class EmployeeList implements OnInit, OnDestroy {
+  // Observable stream consumed by async pipe in template
   employees$!: Observable<Employee[]>;
   private subscription: Subscription = new Subscription();
+
   filterDepartment: string = '';
-
-  displayedColumns: string[] = ['id', 'name', 'role', 'department', 'salary', 'actions'];
-
   showAddForm = false;
   editingEmployee: Employee | null = null;
   viewingEmployee: Employee | null = null;
 
-  constructor(private employeeService: EmployeeService) { }
+  constructor(private employeeService: EmployeeService) {}
 
   ngOnInit() {
+    // Single observable stream — template uses async pipe
     this.employees$ = this.employeeService.getEmployees();
+
+    // Only subscribe for form toggle state (not data)
     this.subscription.add(
       this.employeeService.addEmployee$.subscribe((show) => {
         this.showAddForm = show;
@@ -87,8 +91,8 @@ export class EmployeeList implements OnInit, OnDestroy {
   }
 
   startEdit(employee: Employee) {
-    this.editingEmployee = employee;
-    this.showAddForm = false; // Hide global add form if it was open
+    this.editingEmployee = { ...employee };
+    this.showAddForm = false;
   }
 
   viewEmployee(employee: Employee) {
