@@ -7,6 +7,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { Observable, Subscription } from 'rxjs';
 import { Employee } from '../../models/employee.model';
 import { EmployeeService } from '../../services/employee.service';
@@ -29,8 +30,8 @@ import { EmployeeDetail } from '../employee-detail/employee-detail';
     MatIconModule,
     MatInputModule,
     MatFormFieldModule,
-    EmployeeFormComponent,
-    EmployeeDetail
+    MatDialogModule,
+    EmployeeFormComponent
   ],
   templateUrl: './employee-list.html',
   styleUrl: './employee-list.css',
@@ -43,9 +44,11 @@ export class EmployeeList implements OnInit, OnDestroy {
   filterDepartment: string = '';
   showAddForm = false;
   editingEmployee: Employee | null = null;
-  viewingEmployee: Employee | null = null;
 
-  constructor(private employeeService: EmployeeService) {}
+  constructor(
+    private employeeService: EmployeeService,
+    private dialog: MatDialog
+  ) {}
 
   ngOnInit() {
     // Single observable stream — template uses async pipe
@@ -96,11 +99,14 @@ export class EmployeeList implements OnInit, OnDestroy {
   }
 
   viewEmployee(employee: Employee) {
-    this.viewingEmployee = employee;
-  }
-
-  closeView() {
-    this.viewingEmployee = null;
+    this.dialog.open(EmployeeDetail, {
+      data: employee,
+      width: '500px',
+      maxWidth: '90vw',
+      hasBackdrop: true,
+      backdropClass: 'cdk-overlay-dark-backdrop',
+      panelClass: 'employee-detail-dialog'
+    });
   }
 
   deleteEmployee(id: number) {

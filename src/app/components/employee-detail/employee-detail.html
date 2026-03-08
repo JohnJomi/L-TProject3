@@ -1,39 +1,37 @@
-<div class="detail-overlay" *ngIf="employee">
-    <mat-card class="detail-card mat-elevation-z8">
-        <mat-card-header>
-            <div mat-card-avatar class="header-image">
-                <mat-icon color="primary" class="avatar-icon">account_circle</mat-icon>
-            </div>
-            <mat-card-title>{{ employee.name }}</mat-card-title>
-            <mat-card-subtitle>{{ employee.role }}</mat-card-subtitle>
-            <button mat-icon-button class="close-btn" (click)="onClose()">
-                <mat-icon>close</mat-icon>
-            </button>
-        </mat-card-header>
+<mat-card class="detail-card mat-elevation-z8">
+    <mat-card-header>
+        <div mat-card-avatar class="header-image">
+            <mat-icon color="primary" class="avatar-icon">account_circle</mat-icon>
+        </div>
+        <mat-card-title>{{ employee.name }}</mat-card-title>
+        <mat-card-subtitle>{{ employee.role }}</mat-card-subtitle>
+        <button mat-icon-button class="close-btn" (click)="onClose()">
+            <mat-icon>close</mat-icon>
+        </button>
+    </mat-card-header>
 
-        <mat-divider></mat-divider>
+    <mat-divider></mat-divider>
 
-        <mat-card-content class="content-body">
-            <div class="info-row">
-                <strong>Employee ID:</strong>
-                <span>{{ employee.id }}</span>
-            </div>
-            <div class="info-row" *ngIf="$any(employee).email">
-                <strong>Email:</strong>
-                <span>{{ $any(employee).email }}</span>
-            </div>
-            <div class="info-row">
-                <strong>Department:</strong>
-                <span>{{ employee.department }}</span>
-            </div>
-            <div class="info-row">
-                <strong>Salary:</strong>
-                <span>{{ employee.salary | currency:'USD':'symbol':'1.0-0' }}</span>
-            </div>
-        </mat-card-content>
+    <mat-card-content class="content-body">
+        <div class="info-row">
+            <strong>Employee ID:</strong>
+            <span>{{ employee.id }}</span>
+        </div>
+        <div class="info-row" *ngIf="$any(employee).email">
+            <strong>Email:</strong>
+            <span>{{ $any(employee).email }}</span>
+        </div>
+        <div class="info-row">
+            <strong>Department:</strong>
+            <span>{{ employee.department }}</span>
+        </div>
+        <div class="info-row">
+            <strong>Salary:</strong>
+            <span>{{ employee.salary | currency:'USD':'symbol':'1.0-0' }}</span>
+        </div>
+    </mat-card-content>
 
-        <mat-card-actions align="end">
-            <button mat-button color="primary" (click)="onClose()">Dismiss</button>
-        </mat-card-actions>
-    </mat-card>
-</div>
+    <mat-card-actions align="end">
+        <button mat-button color="primary" (click)="onClose()">Dismiss</button>
+    </mat-card-actions>
+</mat-card>
