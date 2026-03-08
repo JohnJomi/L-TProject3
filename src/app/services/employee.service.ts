@@ -9,7 +9,8 @@ import { Employee } from '../models/employee.model';
 })
 export class EmployeeService {
   private http = inject(HttpClient);
-  private apiUrl = '/assets/employees.json';
+  // Backend API endpoint
+  private apiUrl = 'http://localhost:3000/employees';
 
   // Form visibility state
   private addEmployeeSubject = new BehaviorSubject<boolean>(false);
@@ -51,33 +52,34 @@ export class EmployeeService {
   }
 
   getEmployeeById(id: number): Observable<Employee | undefined> {
-    const employee = this.employees.find(e => e.id === id);
-    return of(employee ? { ...employee } : undefined);
+    return this.http.get<Employee>(`${this.apiUrl}/${id}`).pipe(
+      catchError((error) => {
+        console.error(`Error fetching employee ${id}:`, error);
+        return of(undefined);
+      })
+    );
   }
 
-  // Simulated POST
+  // Real POST to backend
   addEmployee(employee: Employee): Observable<Employee> {
-    const maxId = this.employees.length ? Math.max(...this.employees.map(emp => emp.id)) : 0;
-    const newEmployee = { ...employee, id: maxId + 1 };
-
-    return of(newEmployee).pipe(
-      tap((emp) => {
-        this.employees = [...this.employees, emp];
+    return this.http.post<Employee>(this.apiUrl, employee).pipe(
+      tap((newEmployee) => {
+        this.employees = [...this.employees, newEmployee];
         this.employeesSubject.next(this.employees);
       }),
       catchError(this.handleError)
     );
   }
 
-  // Simulated PUT
+  // Real PUT to backend
   updateEmployee(employee: Employee): Observable<Employee> {
-    return of(employee).pipe(
-      tap((emp) => {
-        const index = this.employees.findIndex(e => e.id === emp.id);
+    return this.http.put<Employee>(`${this.apiUrl}/${employee.id}`, employee).pipe(
+      tap((updatedEmployee) => {
+        const index = this.employees.findIndex(e => e.id === employee.id);
         if (index !== -1) {
           this.employees = [
             ...this.employees.slice(0, index),
-            { ...emp },
+            { ...updatedEmployee },
             ...this.employees.slice(index + 1)
           ];
           this.employeesSubject.next(this.employees);
@@ -87,9 +89,9 @@ export class EmployeeService {
     );
   }
 
-  // Simulated DELETE
-  deleteEmployee(id: number): Observable<boolean> {
-    return of(true).pipe(
+  // Real DELETE to backend
+  deleteEmployee(id: number): Observable<any> {
+    return this.http.delete<any>(`${this.apiUrl}/${id}`).pipe(
       tap(() => {
         this.employees = this.employees.filter(e => e.id !== id);
         this.employeesSubject.next(this.employees);

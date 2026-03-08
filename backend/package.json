@@ -1,0 +1,39 @@
+{
+  "name": "employee-management-backend",
+  "version": "1.0.0",
+  "description": "Employee Management Dashboard Backend API",
+  "main": "src/server.ts",
+  "type": "module",
+  "scripts": {
+    "start": "node --loader ts-node/esm src/server.ts",
+    "dev": "nodemon --exec node --loader ts-node/esm src/server.ts",
+    "build": "tsc",
+    "test": "node --test"
+  },
+  "keywords": [
+    "employee",
+    "management",
+    "dashboard",
+    "express",
+    "sqlite"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.18.2",
+    "sqlite": "^5.0.1",
+    "sqlite3": "^5.1.6",
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
+    "body-parser": "^1.20.2",
+    "uuid": "^9.0.0"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.20",
+    "@types/node": "^20.10.0",
+    "@types/uuid": "^9.0.7",
+    "typescript": "^5.3.3",
+    "ts-node": "^10.9.1",
+    "nodemon": "^3.0.2"
+  }
+}

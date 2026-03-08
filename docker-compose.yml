@@ -1,0 +1,50 @@
+version: '3.8'
+
+services:
+  # Backend Express API
+  backend:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    container_name: emp-mgmt-backend
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+    volumes:
+      - ./server/emp_database.db:/app/emp_database.db
+    networks:
+      - emp-mgmt-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+  # Frontend Angular App with Nginx
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: emp-mgmt-frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    networks:
+      - emp-mgmt-network
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost/"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+networks:
+  emp-mgmt-network:
+    driver: bridge
+
+volumes:
+  db-data:
