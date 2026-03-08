@@ -1,9 +1,9 @@
 <div class="dashboard-container">
-  <!-- Toolbar: Filter + Add Button -->
+  <!-- Toolbar: Search + Add Button -->
   <div class="toolbar">
     <mat-form-field appearance="outline" class="filter-field">
-      <mat-label>Filter by Department</mat-label>
-      <input matInput type="text" [(ngModel)]="filterDepartment" placeholder="e.g., Engineering, Product, Design">
+      <mat-label>Search Employees</mat-label>
+      <input matInput type="text" [(ngModel)]="searchTerm" placeholder="Search employees by name">
       <mat-icon matSuffix>search</mat-icon>
     </mat-form-field>
 
@@ -21,10 +21,10 @@
 
   <!-- Employee List — async pipe unwraps the Observable stream -->
   <div *ngIf="employees$ | async as employees; else loading">
-    <div class="employee-container" *ngIf="(employees | departmentFilter:filterDepartment) as filtered">
+    <div class="employee-container" *ngIf="(employees | employeeSearch:searchTerm) as filtered">
 
       <div *ngIf="filtered.length === 0" class="no-data">
-        No employees found{{ filterDepartment ? ' matching "' + filterDepartment + '"' : '' }}.
+        No employees found{{ searchTerm ? ' matching "' + searchTerm + '"' : '' }}.
       </div>
 
       <div class="employee-card"

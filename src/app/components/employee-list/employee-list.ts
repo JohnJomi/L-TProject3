@@ -11,7 +11,7 @@ import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { Observable, Subscription } from 'rxjs';
 import { Employee } from '../../models/employee.model';
 import { EmployeeService } from '../../services/employee.service';
-import { DepartmentFilterPipe } from '../../pipes/department-filter.pipe';
+import { EmployeeSearchPipe } from '../../pipes/employee-search.pipe';
 import { HighlightSalaryDirective } from '../../directives/highlight-salary.directive';
 import { EmployeeFormComponent } from '../employee-form/employee-form.component';
 import { EmployeeDetail } from '../employee-detail/employee-detail';
@@ -22,7 +22,7 @@ import { EmployeeDetail } from '../employee-detail/employee-detail';
   imports: [
     CommonModule,
     FormsModule,
-    DepartmentFilterPipe,
+    EmployeeSearchPipe,
     HighlightSalaryDirective,
     MatTableModule,
     MatSortModule,
@@ -41,7 +41,7 @@ export class EmployeeList implements OnInit, OnDestroy {
   employees$!: Observable<Employee[]>;
   private subscription: Subscription = new Subscription();
 
-  filterDepartment: string = '';
+  searchTerm: string = '';
   showAddForm = false;
   editingEmployee: Employee | null = null;
 
