@@ -45,9 +45,9 @@ export class EmployeeService {
           this.dataLoaded = false;
           return of([]);
         })
-      ).subscribe();
+      ).subscribe(); // Trigger the HTTP request
     }
-    // Always return the BehaviorSubject stream
+    // Always return the BehaviorSubject stream (consumers get live updates)
     return this.employees$;
   }
 
@@ -64,7 +64,9 @@ export class EmployeeService {
   addEmployee(employee: Employee): Observable<Employee> {
     return this.http.post<Employee>(this.apiUrl, employee).pipe(
       tap((newEmployee) => {
+        // Update local state immediately
         this.employees = [...this.employees, newEmployee];
+        // Emit updated list to all subscribers via BehaviorSubject
         this.employeesSubject.next(this.employees);
       }),
       catchError(this.handleError)

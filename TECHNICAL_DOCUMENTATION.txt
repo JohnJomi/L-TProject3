@@ -1,0 +1,2079 @@
+================================================================================
+        TECHNICAL DOCUMENTATION
+        EMPLOYEE MANAGEMENT DASHBOARD
+        Full Stack Angular Application
+================================================================================
+
+Document Version:   1.0
+Created:            March 9, 2026
+Project:            Employee Management Dashboard
+Repository:         https://github.com/JohnJomi/L-TProject3
+Branch:             main
+
+================================================================================
+TABLE OF CONTENTS
+================================================================================
+
+  1.  PROJECT OVERVIEW
+  2.  TECHNOLOGY STACK
+  3.  PROJECT SETUP
+  4.  PROJECT FOLDER STRUCTURE
+  5.  DATA MODEL DESIGN
+  6.  COMPONENT ARCHITECTURE
+  7.  SERVICE ARCHITECTURE
+  8.  RXJS AND REACTIVE PROGRAMMING
+  9.  CUSTOM PIPE IMPLEMENTATION
+  10. CUSTOM DIRECTIVE IMPLEMENTATION
+  11. ANGULAR MATERIAL INTEGRATION
+  12. EMPLOYEE LIST UI
+  13. EMPLOYEE DETAIL DIALOG
+  14. REACTIVE FORM IMPLEMENTATION
+  15. CRUD OPERATION FLOW
+  16. DEBUGGING AND PROBLEM SOLVING
+  17. PERFORMANCE OPTIMIZATIONS
+  18. RESPONSIVE DESIGN
+  19. ACCESSIBILITY AND UI BEST PRACTICES
+  20. BUILD AND DEPLOYMENT
+  21. FUTURE IMPROVEMENTS
+  22. CONCLUSION
+
+================================================================================
+1. PROJECT OVERVIEW
+================================================================================
+
+1.1 PURPOSE
+
+The Employee Management Dashboard is a full-stack web application designed to
+demonstrate the implementation of a modern enterprise-grade CRUD (Create, Read,
+Update, Delete) interface using the Angular framework. The application provides
+a centralized dashboard for managing employee records within an organization.
+
+The system enables users to perform the following operations:
+
+  - View a complete list of employees rendered as responsive cards
+  - Add new employees through a validated reactive form
+  - Edit existing employee details with pre-populated form data
+  - Delete employees from the system with confirmation dialog
+  - Search employees by name using a real-time filter pipe
+  - View detailed employee information in a Material dialog overlay
+  - Persist all changes to a SQLite database via a REST API backend
+
+1.2 PROBLEM STATEMENT
+
+Organizations require a structured interface for managing workforce data. Manual
+record-keeping is error-prone, difficult to maintain, and does not scale. This
+application solves that problem by providing a type-safe, reactive, and
+responsive web interface backed by a persistent database.
+
+1.3 HOW THE DASHBOARD WORKS
+
+The application follows a unidirectional data flow architecture:
+
+  1. The Angular frontend renders the UI using standalone components.
+  2. The EmployeeService acts as the centralized state manager, holding all
+     employee data inside a BehaviorSubject.
+  3. Components consume the Observable stream from the service using the
+     Angular async pipe in templates.
+  4. When a user performs a CRUD operation, the component calls a service method.
+  5. The service sends an HTTP request to the Express backend REST API.
+  6. The backend executes a SQL query against the SQLite database.
+  7. The backend returns the result as a JSON response.
+  8. The service receives the response, updates its local BehaviorSubject state,
+     and emits the updated employee list to all subscribed components.
+  9. The async pipe detects the new emission and Angular re-renders the template.
+
+This architecture ensures that the UI always reflects the latest state without
+requiring manual DOM manipulation or page refreshes.
+
+
+================================================================================
+2. TECHNOLOGY STACK
+================================================================================
+
+2.1 ANGULAR (VERSION 21.0.0)
+
+Angular is a TypeScript-based open-source web application framework maintained
+by Google. This project uses Angular's standalone component architecture,
+introduced in Angular 14 and made the default in Angular 17. Standalone
+components do not require NgModules, reducing boilerplate and improving tree-
+shaking capabilities.
+
+Key Angular features used in this project:
+  - Standalone components with inline imports
+  - Reactive Forms with FormBuilder and Validators
+  - Dependency Injection via constructor injection and inject() function
+  - Lifecycle hooks (OnInit, OnDestroy, OnChanges)
+  - Template syntax (*ngIf, *ngFor, async pipe, event/property binding)
+  - Two-way binding with [(ngModel)] for search input
+  - Angular Router (configured but not actively used for navigation)
+  - HTTP Client with functional interceptors
+
+2.2 TYPESCRIPT (VERSION 5.9.2)
+
+TypeScript is a statically typed superset of JavaScript that compiles to plain
+JavaScript. It provides compile-time type checking, interfaces, generics, and
+advanced IDE support. This project uses TypeScript in strict mode, ensuring all
+variables, function parameters, and return types are explicitly typed.
+
+Key TypeScript features used:
+  - Interface definitions for data models (Employee)
+  - Access modifiers (private, public)
+  - Generic types (BehaviorSubject<Employee[]>, Observable<Employee[]>)
+  - Optional properties (email?: string)
+  - Type assertions and type guards
+  - Decorators (@Component, @Injectable, @Input, @Output, @Inject, @Directive,
+    @Pipe)
+
+2.3 ANGULAR MATERIAL (VERSION 21.2.0)
+
+Angular Material is the official Material Design component library for Angular.
+It provides pre-built, accessible, and tested UI components that follow Google's
+Material Design specification. This project uses the Indigo-Pink prebuilt theme.
+
+Material components used:
+  - MatToolbar     — Application header/navbar
+  - MatCard        — Employee cards and form container
+  - MatFormField   — Form field wrappers with labels and error messages
+  - MatInput       — Text inputs within form fields
+  - MatButton      — Raised, icon, and flat buttons
+  - MatIcon        — Material Design icon set
+  - MatDialog      — Overlay dialog for employee detail view
+  - MatDivider     — Visual separator in detail view
+  - MatDialogModule, MAT_DIALOG_DATA, MatDialogRef — Dialog service and data
+    injection tokens
+
+2.4 RXJS (VERSION 7.8.0)
+
+RxJS (Reactive Extensions for JavaScript) is a library for composing
+asynchronous and event-based programs using Observable sequences. Angular uses
+RxJS extensively for HTTP communication, event handling, and state management.
+
+RxJS features used:
+  - BehaviorSubject  — Stateful Observable that emits the current value to new
+                       subscribers and retains the latest emission
+  - Observable       — Lazy push-based data stream
+  - Subscription     — Represents the execution of an Observable
+  - Operators: tap, catchError, of, throwError
+  - Pattern: subscribe(), pipe(), asObservable()
+
+2.5 NODE.JS AND EXPRESS (BACKEND)
+
+The backend is built with Node.js (version 18+) and Express.js (version 4.18.2),
+providing a RESTful API server. It uses SQLite3 (version 5.1.6) as the embedded
+database engine for data persistence.
+
+Backend features:
+  - Express middleware (CORS, JSON body parser)
+  - RESTful API endpoints for CRUD operations
+  - Parameterized SQL queries to prevent SQL injection
+  - Automatic database and table creation on first startup
+  - Sample data seeding for development
+  - Error handling with proper HTTP status codes
+  - Health check endpoint for monitoring
+
+
+================================================================================
+3. PROJECT SETUP
+================================================================================
+
+3.1 PREREQUISITES
+
+The following tools must be installed on the development machine:
+
+  - Node.js (version 18 or higher)
+  - npm (version 10 or higher, bundled with Node.js)
+  - Angular CLI (installed globally or via npx)
+
+3.2 PROJECT CREATION
+
+The project was scaffolded using the Angular CLI with the following command:
+
+  ng new employee-management-dashboard --standalone --style=css --routing=true
+
+The --standalone flag configures the project to use standalone components by
+default, eliminating the need for NgModules. The --style=css flag sets CSS as
+the default stylesheet format. The --routing=true flag generates a routing
+module for potential future navigation.
+
+3.3 ANGULAR MATERIAL INSTALLATION
+
+Angular Material was added to the project using the Angular CLI schematic:
+
+  ng add @angular/material
+
+This command installs @angular/material and @angular/cdk, configures the
+Indigo-Pink prebuilt theme in styles.css, adds the Roboto font and Material
+Icons to index.html, and sets up BrowserAnimationsModule.
+
+3.4 DEPENDENCY INSTALLATION
+
+After cloning the repository, all dependencies are installed with:
+
+  npm install
+
+3.5 DEVELOPMENT SERVER
+
+The Angular development server is started with:
+
+  ng serve
+
+This compiles the application, starts a development server at
+http://localhost:4200, and enables hot module replacement for live reloading
+during development.
+
+3.6 BACKEND SERVER
+
+The backend server is started separately from the server/ directory:
+
+  cd server
+  npm install
+  npm start
+
+This starts the Express server at http://localhost:3000 with automatic SQLite
+database creation and sample data seeding.
+
+3.7 FOLDER STRUCTURE CREATED BY ANGULAR CLI
+
+When Angular CLI creates a new project, it generates the following structure:
+
+  employee-management-dashboard/
+  ├── angular.json           <-- Angular workspace configuration
+  ├── package.json           <-- npm dependencies and scripts
+  ├── tsconfig.json          <-- Root TypeScript configuration
+  ├── tsconfig.app.json      <-- Application-specific TypeScript config
+  ├── tsconfig.spec.json     <-- Test-specific TypeScript config
+  ├── public/                <-- Static assets served directly
+  │   └── favicon.ico
+  └── src/
+      ├── index.html         <-- Application entry HTML file
+      ├── main.ts            <-- Application bootstrap file
+      ├── styles.css         <-- Global stylesheet
+      └── app/
+          ├── app.ts         <-- Root component
+          ├── app.html       <-- Root component template
+          ├── app.css        <-- Root component styles
+          ├── app.config.ts  <-- Application configuration (providers)
+          ├── app.routes.ts  <-- Route definitions
+          └── app.spec.ts    <-- Root component test file
+
+Additional folders were created manually to organize features:
+
+  src/app/
+  ├── components/            <-- UI components
+  ├── services/              <-- Data services
+  ├── models/                <-- TypeScript interfaces
+  ├── pipes/                 <-- Custom pipes
+  ├── directives/            <-- Custom directives
+  └── interceptors/          <-- HTTP interceptors
+
+
+================================================================================
+4. PROJECT FOLDER STRUCTURE
+================================================================================
+
+4.1 COMPLETE FOLDER STRUCTURE
+
+  src/
+  └── app/
+      ├── app.ts                          Root component
+      ├── app.html                        Root template
+      ├── app.css                         Root styles
+      ├── app.config.ts                   Application providers
+      ├── app.routes.ts                   Route definitions
+      ├── app.spec.ts                     Root component tests
+      │
+      ├── components/
+      │   ├── navbar/
+      │   │   ├── navbar.ts               Navbar component class
+      │   │   ├── navbar.html             Navbar template
+      │   │   ├── navbar.css              Navbar styles
+      │   │   └── navbar.spec.ts          Navbar tests
+      │   │
+      │   ├── employee-list/
+      │   │   ├── employee-list.ts        Employee list component class
+      │   │   ├── employee-list.html      Employee list template
+      │   │   ├── employee-list.css       Employee list styles
+      │   │   └── employee-list.spec.ts   Employee list tests
+      │   │
+      │   ├── employee-detail/
+      │   │   ├── employee-detail.ts      Employee detail dialog component
+      │   │   ├── employee-detail.html    Employee detail template
+      │   │   ├── employee-detail.css     Employee detail styles
+      │   │   └── employee-detail.spec.ts Employee detail tests
+      │   │
+      │   └── employee-form/
+      │       └── employee-form.component.ts  Employee form (inline template)
+      │
+      ├── services/
+      │   └── employee.service.ts         Centralized data service
+      │
+      ├── models/
+      │   └── employee.model.ts           Employee interface definition
+      │
+      ├── pipes/
+      │   ├── employee-search.pipe.ts     Name search filter pipe
+      │   └── department-filter.pipe.ts   Department filter pipe (legacy)
+      │
+      ├── directives/
+      │   └── highlight-salary.directive.ts   Salary highlight directive
+      │
+      └── interceptors/
+          └── auth.interceptor.ts         HTTP interceptor (mock auth)
+
+4.2 FOLDER PURPOSE EXPLANATION
+
+components/
+  Contains all UI components organized by feature. Each component folder
+  contains the component class (.ts), template (.html), styles (.css), and
+  test file (.spec.ts). This follows the Angular convention of co-locating
+  related files.
+
+services/
+  Contains Angular services that are injectable singletons. The
+  EmployeeService is registered with providedIn: 'root', making it available
+  application-wide through dependency injection without explicit provider
+  configuration.
+
+models/
+  Contains TypeScript interface definitions that define the shape of data
+  objects. Interfaces provide compile-time type checking and IDE autocompletion
+  without generating any JavaScript output.
+
+pipes/
+  Contains custom Angular pipes that transform data in templates. Pipes are
+  pure functions that take an input value and return a transformed output.
+  The EmployeeSearchPipe filters the employee list based on a search term.
+
+directives/
+  Contains custom Angular directives that modify DOM element behavior. The
+  HighlightSalaryDirective conditionally applies visual styles to employee
+  cards based on salary thresholds.
+
+interceptors/
+  Contains HTTP interceptors that process outgoing requests and incoming
+  responses. The authInterceptor attaches a mock authorization header to
+  all HTTP requests and provides centralized error handling.
+
+
+================================================================================
+5. DATA MODEL DESIGN
+================================================================================
+
+5.1 EMPLOYEE INTERFACE DEFINITION
+
+File: src/app/models/employee.model.ts
+
+  export interface Employee {
+    id: number;
+    name: string;
+    email?: string;
+    role: string;
+    department: string;
+    salary: number;
+  }
+
+5.2 FIELD DESCRIPTIONS
+
+  id          number     Unique identifier for the employee. Auto-generated by
+                         the backend database using INTEGER PRIMARY KEY
+                         AUTOINCREMENT. When creating a new employee from the
+                         form, the id is set to 0 as a placeholder; the backend
+                         assigns the real id.
+
+  name        string     Full name of the employee. Required field. Must be at
+                         least 2 characters long as enforced by form validation.
+
+  email       string?    Email address of the employee. Marked as optional with
+                         the TypeScript optional property modifier (?). This
+                         allows backward compatibility with records that may not
+                         have an email field.
+
+  role        string     Job title or role of the employee within the
+                         organization (e.g., "Software Engineer", "Product
+                         Manager"). Required field.
+
+  department  string     The department the employee belongs to (e.g.,
+                         "Engineering", "Product", "Design"). Required field.
+
+  salary      number     Annual salary of the employee in USD. Required field.
+                         Must be greater than or equal to 0 as enforced by form
+                         validation. Displayed with currency formatting in the
+                         template using Angular's built-in currency pipe.
+
+5.3 WHY TYPESCRIPT INTERFACES ARE USED
+
+TypeScript interfaces serve several critical purposes in this project:
+
+  1. Compile-Time Type Safety: The TypeScript compiler verifies that all objects
+     conforming to the Employee interface contain the correct properties with
+     the correct types. Accessing a non-existent property or assigning a wrong
+     type results in a compilation error.
+
+  2. IDE Autocompletion: When a variable is typed as Employee, the IDE provides
+     autocompletion for all properties (id, name, email, role, department,
+     salary), reducing development errors and increasing productivity.
+
+  3. Documentation: The interface serves as living documentation for the data
+     model. Any developer can examine the interface to understand the shape of
+     employee data without reading implementation code.
+
+  4. Refactoring Safety: If a property is renamed or its type is changed in the
+     interface, the compiler immediately reports all locations in the codebase
+     that need to be updated.
+
+  5. Zero Runtime Cost: Unlike classes, interfaces are completely removed during
+     TypeScript compilation. They exist only at compile-time and produce no
+     JavaScript output, adding zero bytes to the production bundle.
+
+5.4 TYPE SAFETY IN THE DATA FLOW
+
+The Employee interface is used consistently across the entire data flow:
+
+  Form Component       → emits Employee via @Output EventEmitter<Employee>
+  List Component        → receives Employee and passes to service
+  EmployeeService       → BehaviorSubject<Employee[]> holds typed array
+  HTTP Client           → get<Employee[]>() types the HTTP response
+  Template              → async pipe unwraps Observable<Employee[]>
+  Dialog                → @Inject(MAT_DIALOG_DATA) public employee: Employee
+
+This creates an end-to-end type-safe pipeline where a type mismatch at any
+point produces a compile-time error rather than a runtime bug.
+
+
+================================================================================
+6. COMPONENT ARCHITECTURE
+================================================================================
+
+6.1 STANDALONE COMPONENT ARCHITECTURE
+
+Angular 17 uses standalone components as the default architecture. Unlike the
+traditional NgModule-based approach, standalone components declare their
+dependencies directly in the @Component decorator's imports array. This
+eliminates the need for a shared module hierarchy and enables true
+component-level tree-shaking.
+
+A standalone component is declared with:
+
+  @Component({
+    standalone: true,
+    imports: [CommonModule, MatButtonModule, ...],
+    ...
+  })
+
+Each standalone component is self-contained: it declares which Angular modules,
+other components, pipes, and directives it needs. This makes components more
+portable and easier to understand, as all dependencies are visible in the
+component file itself.
+
+6.2 COMPONENT HIERARCHY
+
+  ┌─────────────────────────────────────────────────────┐
+  │                     App (Root)                       │
+  │               src/app/app.ts                         │
+  │                                                      │
+  │  ┌────────────────────────────────────────────────┐  │
+  │  │             NavbarComponent                     │  │
+  │  │     src/app/components/navbar/navbar.ts         │  │
+  │  │                                                 │  │
+  │  │  ┌──────────────────────────────────────────┐   │  │
+  │  │  │  MatToolbar + MatIcon + MatButton         │   │  │
+  │  │  │  "Employee Management Dashboard"          │   │  │
+  │  │  └──────────────────────────────────────────┘   │  │
+  │  └────────────────────────────────────────────────┘  │
+  │                                                      │
+  │  ┌────────────────────────────────────────────────┐  │
+  │  │            EmployeeList (Smart)                 │  │
+  │  │  src/app/components/employee-list/              │  │
+  │  │                                                 │  │
+  │  │  ┌──────────────────────────────────────────┐   │  │
+  │  │  │   Search Bar (MatFormField + ngModel)     │   │  │
+  │  │  │   Add Employee Button (MatButton)         │   │  │
+  │  │  └──────────────────────────────────────────┘   │  │
+  │  │                                                 │  │
+  │  │  ┌──────────────────────────────────────────┐   │  │
+  │  │  │  EmployeeFormComponent (Presentational)   │   │  │
+  │  │  │  employee-form/employee-form.component.ts │   │  │
+  │  │  │  [Reactive Form with Validators]          │   │  │
+  │  │  │  (formSubmit) → parent handles service    │   │  │
+  │  │  │  (formCancel) → parent hides form         │   │  │
+  │  │  └──────────────────────────────────────────┘   │  │
+  │  │                                                 │  │
+  │  │  ┌──────────────────────────────────────────┐   │  │
+  │  │  │   Employee Cards Grid                     │   │  │
+  │  │  │   *ngFor + async pipe + search pipe       │   │  │
+  │  │  │   + HighlightSalaryDirective              │   │  │
+  │  │  │                                           │   │  │
+  │  │  │   [View] → opens MatDialog                │   │  │
+  │  │  │   [Edit] → opens form with data           │   │  │
+  │  │  │   [Delete] → confirm + service call       │   │  │
+  │  │  └──────────────────────────────────────────┘   │  │
+  │  └────────────────────────────────────────────────┘  │
+  │                                                      │
+  │  ┌────────────────────────────────────────────────┐  │
+  │  │        EmployeeDetail (Dialog Overlay)          │  │
+  │  │  src/app/components/employee-detail/            │  │
+  │  │                                                 │  │
+  │  │  Opened via MatDialog.open()                    │  │
+  │  │  Receives data via @Inject(MAT_DIALOG_DATA)     │  │
+  │  │  Closed via MatDialogRef.close()                │  │
+  │  └────────────────────────────────────────────────┘  │
+  └─────────────────────────────────────────────────────┘
+
+6.3 SMART VS PRESENTATIONAL COMPONENTS
+
+The project follows the Smart/Presentational component pattern:
+
+SMART COMPONENTS (Container Components):
+  - EmployeeList: Knows about the EmployeeService, manages application state,
+    subscribes to Observables, handles user actions, and orchestrates child
+    components. It injects EmployeeService and MatDialog via the constructor.
+
+PRESENTATIONAL COMPONENTS (Dumb Components):
+  - EmployeeFormComponent: Receives data via @Input (employee to edit), emits
+    events via @Output (formSubmit, formCancel). It has no knowledge of the
+    service or how data is persisted. It only manages form state and validation.
+  - EmployeeDetail: Receives employee data via MAT_DIALOG_DATA injection token.
+    It only displays data and provides a close button.
+  - NavbarComponent: Purely visual. No data dependencies. Renders the toolbar.
+
+This separation ensures:
+  - Presentational components are reusable and testable in isolation
+  - Business logic is concentrated in smart components
+  - Data flow is explicit through @Input/@Output or dialog data injection
+
+6.4 ROOT COMPONENT
+
+File: src/app/app.ts
+
+  @Component({
+    selector: 'app-root',
+    standalone: true,
+    imports: [NavbarComponent, EmployeeList],
+    templateUrl: './app.html',
+  })
+  export class App { }
+
+Template (app.html):
+
+  <app-navbar></app-navbar>
+  <app-employee-list></app-employee-list>
+
+The root component acts as the application shell. It composes the NavbarComponent
+and EmployeeList as direct children. It contains no business logic and serves
+purely as a layout container.
+
+6.5 APPLICATION BOOTSTRAP
+
+File: src/main.ts
+
+  bootstrapApplication(App, appConfig)
+    .catch((err) => console.error(err));
+
+Angular 17 uses the bootstrapApplication() function instead of the legacy
+platformBrowserDynamic().bootstrapModule() approach. This function takes the
+root component and an ApplicationConfig object that provides application-wide
+services.
+
+File: src/app/app.config.ts
+
+  export const appConfig: ApplicationConfig = {
+    providers: [
+      provideBrowserGlobalErrorListeners(),
+      provideRouter(routes),
+      provideHttpClient(withInterceptors([authInterceptor])),
+      provideAnimationsAsync()
+    ]
+  };
+
+The ApplicationConfig provides:
+  - provideBrowserGlobalErrorListeners(): Handles global unhandled errors
+  - provideRouter(routes): Configures the Angular Router
+  - provideHttpClient(withInterceptors([authInterceptor])): Configures HttpClient
+    with a functional interceptor that adds authorization headers
+  - provideAnimationsAsync(): Enables Angular Material animations with lazy
+    loading for improved initial load performance
+
+
+================================================================================
+7. SERVICE ARCHITECTURE
+================================================================================
+
+7.1 EMPLOYEESERVICE OVERVIEW
+
+File: src/app/services/employee.service.ts
+
+The EmployeeService is the centralized state manager and API communication layer
+for the application. It is registered as a singleton service using the
+providedIn: 'root' pattern, meaning Angular creates exactly one instance that
+is shared across all components that inject it.
+
+  @Injectable({
+    providedIn: 'root',
+  })
+  export class EmployeeService { ... }
+
+7.2 SERVICE ARCHITECTURE DIAGRAM
+
+  ┌──────────────────────────────────────────────────────────────┐
+  │                     EmployeeService                          │
+  │                                                              │
+  │  ┌─────────────────────────────────────────────────────────┐ │
+  │  │  STATE LAYER                                            │ │
+  │  │                                                         │ │
+  │  │  private employees: Employee[] = []                     │ │
+  │  │        ↕                                                │ │
+  │  │  private employeesSubject = new BehaviorSubject<>([])   │ │
+  │  │        ↓                                                │ │
+  │  │  employees$ = this.employeesSubject.asObservable()      │ │
+  │  │        ↓                                                │ │
+  │  │  [Consumed by async pipe in EmployeeList template]      │ │
+  │  └─────────────────────────────────────────────────────────┘ │
+  │                                                              │
+  │  ┌─────────────────────────────────────────────────────────┐ │
+  │  │  FORM VISIBILITY STATE                                  │ │
+  │  │                                                         │ │
+  │  │  private addEmployeeSubject = new BehaviorSubject(false)│ │
+  │  │        ↓                                                │ │
+  │  │  addEmployee$ = this.addEmployeeSubject.asObservable()  │ │
+  │  │        ↓                                                │ │
+  │  │  [Consumed by EmployeeList subscription for showAddForm]│ │
+  │  └─────────────────────────────────────────────────────────┘ │
+  │                                                              │
+  │  ┌─────────────────────────────────────────────────────────┐ │
+  │  │  HTTP LAYER                                             │ │
+  │  │                                                         │ │
+  │  │  private http = inject(HttpClient)                      │ │
+  │  │  private apiUrl = 'http://localhost:3000/employees'     │ │
+  │  │                                                         │ │
+  │  │  getEmployees()    → GET    /employees                  │ │
+  │  │  getEmployeeById() → GET    /employees/:id             │ │
+  │  │  addEmployee()     → POST   /employees                 │ │
+  │  │  updateEmployee()  → PUT    /employees/:id             │ │
+  │  │  deleteEmployee()  → DELETE /employees/:id             │ │
+  │  └─────────────────────────────────────────────────────────┘ │
+  └──────────────────────────────────────────────────────────────┘
+
+7.3 BEHAVIORSUBJECT STATE MANAGEMENT
+
+The service maintains two BehaviorSubjects:
+
+1. employeesSubject (BehaviorSubject<Employee[]>):
+   Holds the current list of employees. All components that display employee
+   data subscribe to this stream via the public employees$ Observable.
+
+2. addEmployeeSubject (BehaviorSubject<boolean>):
+   Controls the visibility of the Add Employee form. This decouples the form
+   toggle logic from any single component, allowing the Navbar's Add button
+   to communicate with the EmployeeList component through the service.
+
+7.4 REACTIVE DATA FLOW DIAGRAM
+
+  ┌────────────┐  HTTP POST  ┌──────────────┐  SQL INSERT  ┌──────────┐
+  │  Component  │ ─────────→ │   Express     │ ──────────→ │  SQLite   │
+  │  (UI)       │            │   Server      │             │  Database │
+  └──────┬─────┘            └──────┬───────┘             └────┬─────┘
+         │                         │                          │
+         │                         │ ←─── JSON Response ──────┘
+         │                         │
+         │ ←── Observable<Employee> ┘
+         │
+         │  tap() operator:
+         │    this.employees = [...this.employees, newEmployee]
+         │    this.employeesSubject.next(this.employees)
+         │
+         │          ↓
+         │  BehaviorSubject emits updated Employee[]
+         │          ↓
+         │  employees$ Observable emits new value
+         │          ↓
+         │  async pipe in template detects emission
+         │          ↓
+         │  Angular re-renders the employee card grid
+         ↓
+  ┌────────────┐
+  │  Updated    │
+  │  UI         │
+  └────────────┘
+
+7.5 CRUD OPERATIONS IN THE SERVICE
+
+getEmployees():
+  Fetches the initial employee list from the backend. Uses a dataLoaded flag
+  to prevent duplicate HTTP requests. The HTTP response is piped through tap()
+  to update the local employees array and emit via the BehaviorSubject. The
+  method always returns the employees$ Observable stream, not the raw HTTP
+  Observable. This ensures that consumers receive live updates from the
+  BehaviorSubject regardless of when they subscribe.
+
+  getEmployees(): Observable<Employee[]> {
+    if (!this.dataLoaded) {
+      this.dataLoaded = true;
+      this.http.get<Employee[]>(this.apiUrl).pipe(
+        tap((data) => {
+          this.employees = data;
+          this.employeesSubject.next(this.employees);
+        }),
+        catchError((error) => {
+          this.dataLoaded = false;
+          return of([]);
+        })
+      ).subscribe();
+    }
+    return this.employees$;
+  }
+
+addEmployee(employee):
+  Sends a POST request to the backend. On success, the tap() operator creates
+  a new array by spreading the existing employees and appending the new one.
+  The new array is emitted via the BehaviorSubject. The array is never mutated
+  directly; instead, a new array reference is created to ensure Angular's
+  change detection detects the update.
+
+  addEmployee(employee: Employee): Observable<Employee> {
+    return this.http.post<Employee>(this.apiUrl, employee).pipe(
+      tap((newEmployee) => {
+        this.employees = [...this.employees, newEmployee];
+        this.employeesSubject.next(this.employees);
+      }),
+      catchError(this.handleError)
+    );
+  }
+
+updateEmployee(employee):
+  Sends a PUT request to the backend. On success, the tap() operator finds
+  the index of the updated employee and creates a new array with the updated
+  entry replacing the old one, using array slice operations.
+
+deleteEmployee(id):
+  Sends a DELETE request to the backend. On success, the tap() operator
+  filters out the deleted employee by id and emits the filtered array.
+
+7.6 IMMUTABLE STATE UPDATES
+
+All state mutations in the service follow the immutable update pattern:
+
+  WRONG (mutation):
+    this.employees.push(newEmployee);
+    this.employeesSubject.next(this.employees);
+
+  CORRECT (immutable):
+    this.employees = [...this.employees, newEmployee];
+    this.employeesSubject.next(this.employees);
+
+Creating a new array reference is critical because Angular's change detection
+and the async pipe rely on reference equality checks. If the same array
+reference is emitted, Angular may not detect the change, and the UI would not
+update. By creating a new array with the spread operator, a new reference is
+created, which guarantees the async pipe triggers a re-render.
+
+7.7 HTTP INTERCEPTOR
+
+File: src/app/interceptors/auth.interceptor.ts
+
+The application uses a functional HTTP interceptor registered via the
+withInterceptors() helper in the application config. The interceptor:
+
+  1. Clones every outgoing HTTP request
+  2. Adds an Authorization header with a mock Bearer token
+  3. Catches HTTP errors and logs them to the console
+  4. Re-throws the error so component-level error handlers can process it
+
+  export const authInterceptor: HttpInterceptorFn = (req, next) => {
+    const clonedRequest = req.clone({
+      setHeaders: {
+        Authorization: `Bearer mock-jwt-token-12345`
+      }
+    });
+    return next(clonedRequest).pipe(
+      catchError((error: HttpErrorResponse) => {
+        console.error('HTTP Error Intercepted:', error.message);
+        return throwError(() => new Error('Simulated API request failed'));
+      })
+    );
+  };
+
+This demonstrates the modern functional interceptor pattern introduced in
+Angular 15, which replaces the older class-based HttpInterceptor interface.
+
+
+================================================================================
+8. RXJS AND REACTIVE PROGRAMMING
+================================================================================
+
+8.1 WHAT IS REACTIVE PROGRAMMING
+
+Reactive programming is a declarative programming paradigm concerned with data
+streams and the propagation of change. Instead of imperatively fetching data
+and manually updating the UI, reactive programming establishes streams of data
+that automatically propagate changes to all consumers.
+
+In this application, the EmployeeService creates a stream of employee data.
+When a CRUD operation modifies the data, the service emits the updated list
+through the stream. Any component subscribed to the stream (via the async
+pipe) automatically receives the update and re-renders.
+
+8.2 BEHAVIORSUBJECT
+
+BehaviorSubject is a special type of Observable that:
+  - Requires an initial value (in this case, an empty array [])
+  - Emits the current value to any new subscriber immediately
+  - Retains the latest emission, accessible via .value property
+
+This makes BehaviorSubject ideal for state management because:
+  - New components always receive the current state on subscription
+  - All subscribers receive the same updates simultaneously
+  - The current state can be read synchronously via .value when needed
+
+Declaration in the service:
+
+  private employeesSubject = new BehaviorSubject<Employee[]>([]);
+  employees$ = this.employeesSubject.asObservable();
+
+The asObservable() method creates a read-only Observable from the
+BehaviorSubject. This prevents external code from calling .next() on the
+subject directly, enforcing encapsulation. Only the service can emit new
+values; consumers can only subscribe and read.
+
+8.3 OBSERVABLE STREAMS
+
+The employees$ Observable represents a continuous stream of employee list
+snapshots. Each time the BehaviorSubject emits (via .next()), all subscribers
+receive the new snapshot. Subscribers include:
+
+  - The EmployeeList template via the async pipe
+  - Any future components that inject the service
+
+8.4 ASYNC PIPE
+
+The async pipe is an Angular built-in pipe that subscribes to an Observable
+or Promise and returns the latest value. When the Observable emits a new
+value, the async pipe marks the component for change detection, triggering
+a re-render.
+
+Usage in the template:
+
+  <div *ngIf="employees$ | async as employees; else loading">
+    <div *ngFor="let emp of employees | employeeSearch:searchTerm">
+      ...
+    </div>
+  </div>
+
+The async pipe provides three critical benefits:
+
+  1. Automatic Subscription: No manual .subscribe() call needed in the
+     component class. This eliminates the risk of forgetting to subscribe.
+
+  2. Automatic Unsubscription: When the component is destroyed, the async
+     pipe automatically unsubscribes. This prevents memory leaks that occur
+     when subscriptions outlive their components.
+
+  3. Change Detection: The async pipe integrates with Angular's change
+     detection system. It marks the component as dirty only when a new
+     value arrives, enabling optimized re-rendering.
+
+8.5 SUBSCRIPTION MANAGEMENT
+
+While the async pipe handles most subscriptions automatically, the
+EmployeeList component has one explicit subscription for form visibility
+state:
+
+  ngOnInit() {
+    this.employees$ = this.employeeService.getEmployees();
+    this.subscription.add(
+      this.employeeService.addEmployee$.subscribe((show) => {
+        this.showAddForm = show;
+      })
+    );
+  }
+
+  ngOnDestroy() {
+    this.subscription.unsubscribe();
+  }
+
+The Subscription object's .add() method collects multiple subscriptions. The
+ngOnDestroy lifecycle hook ensures all collected subscriptions are disposed
+when the component is destroyed, preventing memory leaks.
+
+8.6 WHY REACTIVE PROGRAMMING IS USED
+
+  1. Automatic UI Updates: Changes to data automatically propagate to the UI
+     without manual DOM manipulation or explicit refresh calls.
+
+  2. Single Source of Truth: The BehaviorSubject holds the authoritative state.
+     Multiple components can consume the same stream without state duplication.
+
+  3. Decoupling: Components don't need to know how data is fetched or stored.
+     They simply subscribe to an Observable and receive updates.
+
+  4. Composability: RxJS operators (tap, catchError, map, filter) can transform
+     streams declaratively without side effects.
+
+  5. Predictability: Unidirectional data flow (Service → Observable → Template)
+     makes the application easier to debug and reason about.
+
+
+================================================================================
+9. CUSTOM PIPE IMPLEMENTATION
+================================================================================
+
+9.1 EMPLOYEE SEARCH PIPE
+
+File: src/app/pipes/employee-search.pipe.ts
+
+  @Pipe({
+    name: 'employeeSearch',
+    standalone: true,
+    pure: false
+  })
+  export class EmployeeSearchPipe implements PipeTransform {
+    transform(employees: Employee[] | null, searchTerm: string): Employee[] {
+      if (!employees) return [];
+      if (!searchTerm || !searchTerm.trim()) return employees;
+      const term = searchTerm.toLowerCase().trim();
+      return employees.filter(emp =>
+        emp.name.toLowerCase().includes(term)
+      );
+    }
+  }
+
+9.2 HOW THE PIPE WORKS
+
+The EmployeeSearchPipe implements Angular's PipeTransform interface, which
+requires a transform() method. This method receives:
+
+  1. employees: The full employee array (or null if the async pipe hasn't
+     emitted yet)
+  2. searchTerm: The current value of the search input field
+
+The transform logic:
+
+  Step 1: If employees is null or undefined, return an empty array.
+          This handles the initial state before the HTTP request completes.
+
+  Step 2: If searchTerm is empty, null, or contains only whitespace, return
+          the full employee array unfiltered.
+
+  Step 3: Convert the search term to lowercase and trim whitespace for
+          case-insensitive comparison.
+
+  Step 4: Filter the employees array, returning only those whose name
+          property contains the search term as a substring.
+
+9.3 PURE VS IMPURE PIPES
+
+The pipe is declared with pure: false. In Angular, a pure pipe is only
+re-evaluated when its input reference changes. An impure pipe is re-evaluated
+on every change detection cycle.
+
+This pipe is set to impure because:
+  - The searchTerm input is a primitive string bound via [(ngModel)].
+  - The employees input comes from the async pipe, which creates new array
+    references on each emission.
+  - The impure setting ensures the pipe re-evaluates whenever the user types
+    in the search field, providing real-time filtering.
+
+9.4 PIPE USAGE IN THE TEMPLATE
+
+  <div *ngIf="(employees | employeeSearch:searchTerm) as filtered">
+    <div *ngFor="let emp of filtered">
+      ...
+    </div>
+  </div>
+
+The pipe is applied inline in the template using the pipe operator (|). The
+search term is passed as a parameter after the colon (:). The result is
+aliased as 'filtered' using the *ngIf 'as' syntax, which allows checking
+the filtered length for empty state messages.
+
+9.5 DEPARTMENT FILTER PIPE (LEGACY)
+
+File: src/app/pipes/department-filter.pipe.ts
+
+A legacy DepartmentFilterPipe also exists in the project. It filters employees
+by department name using the same case-insensitive includes() logic. This pipe
+was the original implementation before the search-by-name approach was adopted
+for better usability. It is retained in the codebase but is not imported or
+used in any active component.
+
+
+================================================================================
+10. CUSTOM DIRECTIVE IMPLEMENTATION
+================================================================================
+
+10.1 HIGHLIGHT SALARY DIRECTIVE
+
+File: src/app/directives/highlight-salary.directive.ts
+
+  @Directive({
+    selector: '[appHighlightSalary]',
+    standalone: true
+  })
+  export class HighlightSalaryDirective implements OnChanges {
+    @Input() salary: number = 0;
+
+    constructor(private el: ElementRef, private renderer: Renderer2) { }
+
+    ngOnChanges() {
+      if (this.salary > 50000) {
+        this.renderer.setStyle(
+          this.el.nativeElement, 'backgroundColor', '#e6fffa'
+        );
+        this.renderer.setStyle(
+          this.el.nativeElement, 'borderLeft', '4px solid #00b5ad'
+        );
+      } else {
+        this.renderer.removeStyle(this.el.nativeElement, 'backgroundColor');
+        this.renderer.removeStyle(this.el.nativeElement, 'borderLeft');
+      }
+    }
+  }
+
+10.2 HOW THE DIRECTIVE WORKS
+
+The HighlightSalaryDirective is an attribute directive that conditionally
+applies visual styling to DOM elements based on salary value.
+
+Selector: '[appHighlightSalary]'
+  The directive uses an attribute selector, meaning it is activated when the
+  appHighlightSalary attribute is present on any HTML element.
+
+@Input() salary:
+  The directive receives the employee's salary as an input property. This is
+  bound from the template via [salary]="emp.salary".
+
+10.3 DOM MANIPULATION WITH RENDERER2
+
+The directive uses Angular's Renderer2 service for DOM manipulation instead of
+directly accessing the native element. Renderer2 provides an abstraction layer
+that:
+
+  1. Is platform-agnostic (works in server-side rendering environments)
+  2. Sanitizes style values to prevent XSS attacks
+  3. Follows Angular's security guidelines
+
+The ngOnChanges() lifecycle hook fires whenever the salary input changes. The
+directive evaluates the salary threshold:
+
+  - If salary > 50,000: Apply a subtle teal background (#e6fffa) and a
+    4px solid teal left border (#00b5ad) to visually highlight high earners.
+  - If salary <= 50,000: Remove any previously applied styles to reset the
+    element to its default appearance.
+
+10.4 DIRECTIVE USAGE IN THE TEMPLATE
+
+  <div class="employee-card"
+       *ngFor="let emp of filtered"
+       appHighlightSalary
+       [salary]="emp.salary">
+    ...
+  </div>
+
+The directive is applied as an attribute on each employee card element. The
+salary input is bound to the current employee's salary from the *ngFor
+iteration. As the employee list updates (via async pipe emissions), Angular
+re-evaluates the directive for each card.
+
+10.5 ELEMENTREF VS RENDERER2
+
+ElementRef provides direct access to the underlying DOM element via
+.nativeElement. While this works, direct DOM access bypasses Angular's
+rendering abstraction and can cause issues in non-browser environments.
+
+Renderer2 provides methods like setStyle() and removeStyle() that safely
+modify the DOM through Angular's rendering engine. This project uses
+Renderer2 as the recommended approach.
+
+
+================================================================================
+11. ANGULAR MATERIAL INTEGRATION
+================================================================================
+
+11.1 MATERIAL THEME CONFIGURATION
+
+The Angular Material theme is loaded via a CSS import in the global stylesheet:
+
+  File: src/styles.css
+  @import '@angular/material/prebuilt-themes/indigo-pink.css';
+
+This import loads the prebuilt Indigo-Pink theme, which provides:
+  - Primary color: Indigo (#3f51b5)
+  - Accent color: Pink
+  - Warn color: Red
+  - Component-specific styles for all Material components
+  - CDK overlay styles (critical for MatDialog backdrop)
+  - Typography styles for the Roboto font
+
+11.2 MATERIAL FONTS AND ICONS
+
+  File: src/index.html
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons"
+        rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500
+        &display=swap" rel="stylesheet">
+
+The Material Icons font is loaded from Google Fonts CDN. This enables the
+<mat-icon> component to render icons by name (e.g., "edit", "delete",
+"visibility", "add", "close", "business", "more_vert", "search",
+"account_circle").
+
+The Roboto font is loaded in three weights (300, 400, 500) as required by
+Material Design typography specifications.
+
+11.3 MATERIAL COMPONENTS USED
+
+MatToolbar (NavbarComponent):
+  Renders the application header bar. Configured with a custom background
+  color (#3f51b5, Material Indigo) and white text. Contains the app title,
+  a business icon, and a more options button.
+
+MatCard (EmployeeFormComponent, EmployeeDetail):
+  Used as the container for the Add/Edit form and the employee detail dialog.
+  Provides elevation, padding, and structured sections (header, content,
+  actions).
+
+MatFormField (EmployeeList, EmployeeFormComponent):
+  Wraps input fields with a floating label, outline appearance, error message
+  slots, and prefix/suffix icon support. The appearance="outline" variant is
+  used throughout for a clean, bordered input style.
+
+MatInput:
+  The matInput directive transforms a standard <input> element into a Material
+  Design input that integrates with MatFormField. It handles focus states,
+  error states, and placeholder display.
+
+MatDialog (EmployeeList → EmployeeDetail):
+  The MatDialog service programmatically opens overlay dialogs. Configuration
+  options include width, maxWidth, hasBackdrop, backdropClass, and panelClass.
+  The dialog receives data via the MAT_DIALOG_DATA injection token and is
+  controlled via MatDialogRef.
+
+MatButton:
+  Used in three variants:
+  - mat-raised-button: Primary action buttons (Add Employee, Create, Save)
+  - mat-icon-button: Icon-only buttons (View, Edit, Delete on cards)
+  - mat-button: Flat buttons (Cancel, Dismiss)
+
+MatIcon:
+  Renders Material Design icons by name. Used throughout the application for
+  action buttons, toolbar icons, and decorative elements.
+
+MatDivider:
+  A horizontal rule component used in the EmployeeDetail dialog to separate
+  the header from the content area.
+
+
+================================================================================
+12. EMPLOYEE LIST UI
+================================================================================
+
+12.1 TEMPLATE STRUCTURE
+
+File: src/app/components/employee-list/employee-list.html
+
+The template is structured in three sections:
+
+Section 1 — Toolbar:
+  Contains a MatFormField with a search input and an Add Employee button.
+  The search input uses two-way binding [(ngModel)]="searchTerm" to
+  synchronize the input value with the component property. The button toggles
+  the form visibility and displays a dynamic icon/label.
+
+Section 2 — Add/Edit Form:
+  Conditionally rendered via *ngIf="showAddForm || editingEmployee". The
+  EmployeeFormComponent receives the editingEmployee via @Input and emits
+  events via @Output for submit and cancel actions.
+
+Section 3 — Employee Card Grid:
+  Uses the async pipe to unwrap the employees$ Observable. The employee array
+  is piped through the EmployeeSearchPipe for filtering. Each employee is
+  rendered as a card in a CSS Grid layout.
+
+12.2 ASYNC PIPE IN THE TEMPLATE
+
+  <div *ngIf="employees$ | async as employees; else loading">
+
+This expression:
+  1. Subscribes to employees$ Observable
+  2. Unwraps the emitted Employee[] array
+  3. Aliases it as 'employees' for use within the block
+  4. Shows the #loading template while waiting for the first emission
+  5. Automatically unsubscribes when the component is destroyed
+
+12.3 NGFOR WITH SEARCH PIPE
+
+  <div *ngFor="let emp of filtered"
+       appHighlightSalary
+       [salary]="emp.salary">
+
+Each employee card iterates over the filtered result. The *ngFor structural
+directive creates one card div per employee. The HighlightSalaryDirective is
+applied to each card with the employee's salary bound as input.
+
+12.4 EMPLOYEE CARD CONTENT
+
+Each card displays:
+  - Employee name (h3 heading)
+  - Employee ID (badge-style span)
+  - Three action buttons: View (visibility icon), Edit (edit icon),
+    Delete (delete icon)
+  - Role, Department, Salary (with currency pipe), and Email (conditional)
+
+The salary is formatted using Angular's built-in currency pipe:
+
+  {{ emp.salary | currency:'USD':'symbol':'1.0-0' }}
+
+This formats the number as USD with the dollar sign, no decimal places.
+
+12.5 RESPONSIVE CARD GRID
+
+  .employee-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 20px;
+  }
+
+The CSS Grid layout uses auto-fit with a minimum card width of 280px. This
+creates a responsive grid that automatically adjusts the number of columns
+based on available width without media queries.
+
+
+================================================================================
+13. EMPLOYEE DETAIL DIALOG
+================================================================================
+
+13.1 MATDIALOG IMPLEMENTATION
+
+The EmployeeDetail component is opened as a Material dialog overlay, not
+rendered directly in the template. The EmployeeList component opens the
+dialog programmatically:
+
+  viewEmployee(employee: Employee) {
+    this.dialog.open(EmployeeDetail, {
+      data: employee,
+      width: '500px',
+      maxWidth: '90vw',
+      hasBackdrop: true,
+      backdropClass: 'cdk-overlay-dark-backdrop',
+      panelClass: 'employee-detail-dialog'
+    });
+  }
+
+13.2 DIALOG CONFIGURATION
+
+  data: employee
+    The employee object is passed as dialog data. This is received by the
+    dialog component via the MAT_DIALOG_DATA injection token.
+
+  width: '500px'
+    Sets the default width of the dialog panel.
+
+  maxWidth: '90vw'
+    Limits the maximum width to 90% of the viewport width, ensuring the
+    dialog is responsive on smaller screens.
+
+  hasBackdrop: true
+    Enables the dark semi-transparent backdrop overlay behind the dialog.
+    This is critical for visual separation between the dialog and the
+    background content.
+
+  backdropClass: 'cdk-overlay-dark-backdrop'
+    Applies the CDK's built-in dark backdrop class, which renders a
+    semi-transparent black overlay (rgba(0, 0, 0, 0.32)).
+
+  panelClass: 'employee-detail-dialog'
+    Adds a custom CSS class to the dialog panel for additional styling.
+
+13.3 DIALOG COMPONENT
+
+File: src/app/components/employee-detail/employee-detail.ts
+
+  @Component({
+    selector: 'app-employee-detail',
+    standalone: true,
+    imports: [
+      CommonModule, MatCardModule, MatButtonModule,
+      MatIconModule, MatDividerModule, MatDialogModule
+    ],
+    templateUrl: './employee-detail.html',
+    styleUrl: './employee-detail.css',
+  })
+  export class EmployeeDetail {
+    constructor(
+      @Inject(MAT_DIALOG_DATA) public employee: Employee,
+      public dialogRef: MatDialogRef<EmployeeDetail>
+    ) {}
+
+    onClose() {
+      this.dialogRef.close();
+    }
+  }
+
+13.4 DATA INJECTION VIA MAT_DIALOG_DATA
+
+The @Inject(MAT_DIALOG_DATA) decorator injects the data object passed in
+the dialog.open() configuration. This replaces the @Input/@Output pattern
+used in non-dialog components. The employee data is available immediately
+in the constructor without lifecycle hook processing.
+
+13.5 DIALOG TEMPLATE
+
+The dialog template displays employee details in a Material Card with:
+  - Header: Avatar icon, employee name, and role
+  - Close button positioned absolutely in the top-right corner
+  - MatDivider separator
+  - Info rows displaying ID, Email, Department, and Salary
+  - Dismiss button in the card actions area
+
+13.6 CDK OVERLAY SYSTEM
+
+Angular Material's dialog system is built on the Component Dev Kit (CDK)
+overlay system. When dialog.open() is called, the CDK:
+
+  1. Creates an overlay container (cdk-overlay-container) at the document body
+  2. Renders a backdrop element with the specified class
+  3. Creates a positioned overlay pane inside the container
+  4. Dynamically instantiates the dialog component inside the pane
+  5. Centers the dialog vertically and horizontally
+  6. Manages focus trapping, keyboard events (Escape to close), and
+     backdrop click handling
+
+
+================================================================================
+14. REACTIVE FORM IMPLEMENTATION
+================================================================================
+
+14.1 FORM COMPONENT OVERVIEW
+
+File: src/app/components/employee-form/employee-form.component.ts
+
+The EmployeeFormComponent uses Angular Reactive Forms (also known as
+Model-Driven Forms). Reactive Forms provide a synchronous, testable, and
+fully programmatic approach to form handling where the form model is defined
+in the component class.
+
+14.2 FORMBUILDER AND FORMGROUP
+
+The FormBuilder service is injected via the constructor and used to create
+a FormGroup with five form controls:
+
+  constructor(private fb: FormBuilder) {
+    this.employeeForm = this.fb.group({
+      name:       ['', [Validators.required, Validators.minLength(2)]],
+      email:      ['', [Validators.required, Validators.email]],
+      role:       ['', [Validators.required]],
+      department: ['', [Validators.required]],
+      salary:     [null, [Validators.required, Validators.min(0)]]
+    });
+  }
+
+Each array element in the fb.group() configuration represents:
+  [0]: Initial value of the form control
+  [1]: Array of synchronous validators
+
+14.3 VALIDATION RULES
+
+  name:
+    - Validators.required: The field must not be empty
+    - Validators.minLength(2): The value must be at least 2 characters
+
+  email:
+    - Validators.required: The field must not be empty
+    - Validators.email: The value must match a valid email pattern
+
+  role:
+    - Validators.required: The field must not be empty
+
+  department:
+    - Validators.required: The field must not be empty
+
+  salary:
+    - Validators.required: The field must not be empty
+    - Validators.min(0): The value must be greater than or equal to zero
+    - Initial value is null (not 0) to force explicit user input
+
+14.4 FORM CONTROL BINDING IN THE TEMPLATE
+
+  <form [formGroup]="employeeForm" (ngSubmit)="onSubmit()">
+    <input matInput formControlName="name">
+    <input matInput formControlName="email" type="email">
+    <input matInput formControlName="role">
+    <input matInput formControlName="department">
+    <input matInput type="number" formControlName="salary">
+  </form>
+
+The [formGroup] directive binds the form element to the FormGroup instance.
+Each formControlName directive binds an input to a specific FormControl within
+the group. The (ngSubmit) event fires when the form is submitted.
+
+14.5 ERROR DISPLAY
+
+  <mat-error *ngIf="employeeForm.get('name')?.hasError('required')
+             && employeeForm.get('name')?.touched">
+    Name is required.
+  </mat-error>
+
+Error messages are displayed using <mat-error> elements within <mat-form-field>.
+Each error message checks two conditions:
+
+  1. The specific validation error exists (e.g., hasError('required'))
+  2. The field has been touched (the user has interacted with it)
+
+The touched check prevents error messages from showing on initial form load
+before the user has had a chance to fill in the fields. This provides a
+better user experience.
+
+14.6 SUBMIT BUTTON STATE
+
+  <button mat-raised-button color="primary" type="submit"
+          [disabled]="employeeForm.invalid">
+    {{ employee ? 'Save Changes' : 'Create' }}
+  </button>
+
+The submit button is disabled when the form is invalid. The button label
+dynamically switches between "Create" (add mode) and "Save Changes" (edit
+mode) based on whether an employee @Input is provided.
+
+14.7 FORM SUBMISSION FLOW
+
+  onSubmit() {
+    if (this.employeeForm.invalid) {
+      this.employeeForm.markAllAsTouched();
+      return;
+    }
+    const formValue = this.employeeForm.value;
+    const submittedEmployee: Employee = this.employee ?
+      { ...this.employee, ...formValue } :
+      { id: 0, ...formValue };
+    this.formSubmit.emit(submittedEmployee);
+    this.employeeForm.reset({}, { emitEvent: false });
+    Object.keys(this.employeeForm.controls).forEach(key => {
+      this.employeeForm.get(key)?.markAsUntouched();
+    });
+  }
+
+Step 1: If the form is invalid, mark all fields as touched to trigger error
+        display, then return without submitting.
+Step 2: Extract the raw form values.
+Step 3: Create the Employee object. In edit mode, spread the existing employee
+        (preserving the id) and overlay form values. In add mode, set id to 0
+        as a placeholder (the backend assigns the real id).
+Step 4: Emit the employee to the parent component via the @Output EventEmitter.
+Step 5: Reset the form with emitEvent: false to prevent triggering unnecessary
+        change detection cycles.
+Step 6: Mark all fields as untouched to clear any visible error states.
+
+14.8 EDIT MODE VIA NGONCHANGES
+
+  ngOnChanges() {
+    if (this.employee) {
+      this.employeeForm.patchValue({
+        name: this.employee.name,
+        email: (this.employee as any).email || '',
+        role: this.employee.role,
+        department: this.employee.department,
+        salary: this.employee.salary
+      });
+      Object.keys(this.employeeForm.controls).forEach(key => {
+        this.employeeForm.get(key)?.markAsUntouched();
+      });
+    } else {
+      this.employeeForm.reset({}, { emitEvent: false });
+      Object.keys(this.employeeForm.controls).forEach(key => {
+        this.employeeForm.get(key)?.markAsUntouched();
+      });
+    }
+  }
+
+The ngOnChanges lifecycle hook fires whenever an @Input property changes.
+When the parent sets the employee @Input (edit mode), the form is populated
+with the existing employee data using patchValue(). When the input is null
+(add mode), the form is reset to a clean state. In both cases, all fields
+are marked as untouched to prevent premature error display.
+
+14.9 CANCEL HANDLER
+
+  onCancel() {
+    this.employeeForm.reset({}, { emitEvent: false });
+    Object.keys(this.employeeForm.controls).forEach(key => {
+      this.employeeForm.get(key)?.markAsUntouched();
+    });
+    this.formCancel.emit();
+  }
+
+The cancel handler resets the form, clears validation states, and emits a
+cancel event to the parent component. The parent then hides the form.
+
+
+================================================================================
+15. CRUD OPERATION FLOW
+================================================================================
+
+15.1 CREATE EMPLOYEE FLOW
+
+  Step 1: User clicks "Add Employee" button in the toolbar.
+          → EmployeeList.toggleAddForm() is called
+          → EmployeeService.toggleAddForm() toggles addEmployeeSubject
+          → addEmployee$ emits true
+          → EmployeeList receives true via subscription, sets showAddForm = true
+          → *ngIf="showAddForm" renders the EmployeeFormComponent
+
+  Step 2: User fills in the form fields and clicks "Create".
+          → (ngSubmit) fires EmployeeFormComponent.onSubmit()
+          → Form validation passes
+          → formSubmit.emit(employee) sends employee to parent
+
+  Step 3: Parent receives the event.
+          → EmployeeList.onFormSubmit(employee) is called
+          → this.employeeService.addEmployee(employee).subscribe() executes
+
+  Step 4: Service sends HTTP POST request.
+          → POST http://localhost:3000/employees with employee JSON body
+          → Express server validates request body
+          → Express executes INSERT INTO employees (...) VALUES (...)
+          → SQLite assigns auto-incremented id
+          → Express responds with 201 Created and the new employee JSON
+
+  Step 5: Service updates local state.
+          → tap() operator receives the new employee from HTTP response
+          → this.employees = [...this.employees, newEmployee]
+          → this.employeesSubject.next(this.employees)
+          → BehaviorSubject emits updated Employee[] to all subscribers
+
+  Step 6: UI updates automatically.
+          → employees$ Observable in the template receives new emission
+          → async pipe unwraps the new array
+          → EmployeeSearchPipe re-evaluates with the new array
+          → *ngFor re-renders the card grid with the new employee included
+          → EmployeeService.resetAddForm() hides the form
+
+15.2 UPDATE EMPLOYEE FLOW
+
+  Step 1: User clicks the Edit (pencil) icon on an employee card.
+          → EmployeeList.startEdit(employee) is called
+          → this.editingEmployee = { ...employee } (creates a copy)
+          → *ngIf="editingEmployee" renders the EmployeeFormComponent
+          → ngOnChanges fires in EmployeeFormComponent
+          → patchValue() populates the form with existing data
+
+  Step 2: User modifies form fields and clicks "Save Changes".
+          → onSubmit() creates employee with { ...this.employee, ...formValue }
+          → formSubmit.emit(employee) sends to parent
+
+  Step 3: Parent calls updateEmployee.
+          → this.employeeService.updateEmployee(employee).subscribe()
+          → PUT http://localhost:3000/employees/:id with updated JSON
+
+  Step 4: Service updates local state.
+          → tap() finds the employee index and replaces it with a new array
+          → BehaviorSubject emits updated list
+          → UI re-renders with updated employee data
+
+15.3 DELETE EMPLOYEE FLOW
+
+  Step 1: User clicks the Delete (trash) icon on an employee card.
+          → EmployeeList.deleteEmployee(emp.id) is called
+          → confirm() dialog asks user to confirm
+
+  Step 2: If confirmed, service call is made.
+          → this.employeeService.deleteEmployee(id).subscribe()
+          → DELETE http://localhost:3000/employees/:id
+
+  Step 3: Service updates local state.
+          → tap() filters out the deleted employee by id
+          → BehaviorSubject emits filtered list
+          → UI re-renders without the deleted employee
+
+
+================================================================================
+16. DEBUGGING AND PROBLEM SOLVING
+================================================================================
+
+16.1 EMPLOYEES NOT RENDERING
+
+Problem:
+  The employee list displayed "Loading..." indefinitely. No employees appeared
+  even though the HTTP request was returning data successfully.
+
+Root Cause:
+  The original implementation used MatTableDataSource, which is designed for
+  Material tables. The template was using *ngFor with async pipe on a div-based
+  card layout, which is incompatible with MatTableDataSource.
+
+Solution:
+  Replaced MatTableDataSource with a direct BehaviorSubject<Employee[]> stream.
+  The getEmployees() method now always returns the BehaviorSubject's Observable.
+  The template consumes this Observable directly via the async pipe:
+
+    <div *ngIf="employees$ | async as employees; else loading">
+
+16.2 NAVBAR ICONS SHOWING AS TEXT
+
+Problem:
+  Material icons displayed as their text names ("business", "more_vert") instead
+  of rendering as graphical icons.
+
+Root Cause:
+  The Google Material Icons font was not loaded. The <mat-icon> component
+  requires the Material Icons font to map icon names to their graphical
+  representations.
+
+Solution:
+  Added the Material Icons font link to index.html:
+
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons"
+          rel="stylesheet">
+
+  Also added the Roboto font for proper Material Design typography.
+
+16.3 FILTER LOGIC NOT WORKING
+
+Problem:
+  The department filter was not returning any results when typing partial
+  department names. Users had to type the exact full department name.
+
+Root Cause:
+  The original filter used strict equality (===) instead of substring matching
+  (includes()). Additionally, the pipe was declared as pure: true, which
+  prevented re-evaluation when the filter string changed because the employees
+  array reference remained the same.
+
+Solution:
+  Changed the filter logic from exact match to partial match using includes().
+  Set the pipe to pure: false to ensure re-evaluation on every change detection
+  cycle. Later, the department filter was replaced entirely with an employee
+  name search pipe for better usability.
+
+16.4 MATDIALOG BACKDROP NOT SHOWING
+
+Problem:
+  When opening the employee detail dialog, no dark backdrop overlay appeared
+  behind the dialog. The dialog floated directly on top of the main content
+  with no visual separation.
+
+Root Cause:
+  Two issues:
+  1. The original implementation used a custom overlay div with fixed positioning
+     instead of the Material MatDialog service.
+  2. The Angular Material prebuilt theme CSS was not imported, so the CDK
+     overlay styles (.cdk-overlay-backdrop, .cdk-overlay-container) were missing.
+
+Solution:
+  1. Replaced the custom overlay approach with MatDialog.open() service call.
+  2. Added the Material theme import to global styles:
+     @import '@angular/material/prebuilt-themes/indigo-pink.css';
+  3. Configured dialog with hasBackdrop: true and backdropClass.
+  4. Changed the EmployeeDetail component from @Input/@Output pattern to
+     @Inject(MAT_DIALOG_DATA) pattern.
+
+16.5 REACTIVE FORM VALIDATION BUG
+
+Problem:
+  The Add Employee form could never be submitted. The "Create" button remained
+  permanently disabled regardless of what the user entered in the form fields.
+
+Root Cause:
+  The salary form control was initialized with a value of 0:
+
+    salary: [0, [Validators.required, Validators.min(1)]]
+
+  The value 0 satisfied Validators.required (because 0 is not null or empty),
+  but failed Validators.min(1) (because 0 < 1). This placed the salary control
+  in a permanently invalid state on initial load. Meanwhile, other fields were
+  empty and also invalid. The form could never reach a fully valid state because
+  the salary was always invalid.
+
+Solution:
+  Changed the initial value from 0 to null and the minimum from 1 to 0:
+
+    salary: [null, [Validators.required, Validators.min(0)]]
+
+  With null as the initial value, the salary field is truly empty, and
+  Validators.required correctly identifies it as invalid until the user enters
+  a value. Validators.min(0) allows 0 as a valid salary. When the user enters
+  any non-negative number, the field becomes valid.
+
+16.6 EMPLOYEE NOT BEING ADDED TO THE LIST
+
+Problem:
+  After fixing the form validation bug, the form submitted successfully, but
+  the new employee did not appear in the employee list. The UI did not update.
+
+Root Cause:
+  The form component was emitting the employee to the parent via @Output, and
+  the parent was correctly calling employeeService.addEmployee().subscribe().
+  However, the form was being closed (via resetAddForm()) before the HTTP
+  response was received. Additionally, the BehaviorSubject state update needed
+  to properly create a new array reference to trigger change detection.
+
+Solution:
+  Ensured that the service's addEmployee() method creates a new array reference
+  using the spread operator:
+
+    this.employees = [...this.employees, newEmployee];
+    this.employeesSubject.next(this.employees);
+
+  Ensured the parent component properly subscribes to the Observable with
+  error handling:
+
+    this.employeeService.addEmployee(employee).subscribe({
+      next: () => { this.employeeService.resetAddForm(); },
+      error: (error) => { console.error('Error:', error); }
+    });
+
+  The form is now closed only in the next: callback, after the HTTP request
+  succeeds and the BehaviorSubject has emitted the updated list.
+
+
+================================================================================
+17. PERFORMANCE OPTIMIZATIONS
+================================================================================
+
+17.1 ASYNC PIPE ADVANTAGES
+
+The async pipe eliminates manual subscription management. It subscribes when
+the component initializes and unsubscribes when the component is destroyed.
+This prevents memory leaks caused by orphaned subscriptions. It also integrates
+with Angular's OnPush change detection strategy, marking the component for
+re-render only when the Observable emits a new value.
+
+17.2 BEHAVIORSUBJECT USAGE
+
+BehaviorSubject provides synchronous access to the current state via .value
+when needed (e.g., in toggleAddForm()). It also ensures that late subscribers
+immediately receive the current state without waiting for the next emission.
+This eliminates race conditions where a component subscribes after the initial
+data fetch completes.
+
+17.3 COMPONENT-SCOPED CSS
+
+Each component's CSS is scoped using Angular's ViewEncapsulation (default:
+Emulated). This means CSS rules defined in employee-list.css only apply to
+elements within the EmployeeList component. This prevents style conflicts
+between components and eliminates the need for complex CSS naming conventions
+like BEM.
+
+17.4 SINGLE HTTP REQUEST
+
+The dataLoaded flag in EmployeeService ensures the initial HTTP GET request
+is made only once, even if multiple components call getEmployees(). Subsequent
+calls return the BehaviorSubject stream directly without triggering additional
+HTTP requests.
+
+17.5 CSS GRID LAYOUT PERFORMANCE
+
+CSS Grid with auto-fit and minmax() creates responsive layouts without
+JavaScript calculations. The browser handles column count and sizing natively,
+which is significantly more performant than JavaScript-based responsive
+solutions. The layout recalculates only during window resize, not on every
+change detection cycle.
+
+17.6 IMMUTABLE ARRAY UPDATES
+
+By creating new array references on every state update (using spread operator),
+Angular's default change detection can quickly determine whether the employees
+list has changed by comparing object references rather than deep-comparing
+array contents.
+
+
+================================================================================
+18. RESPONSIVE DESIGN
+================================================================================
+
+18.1 CSS GRID FOR CARD LAYOUT
+
+  .employee-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 20px;
+  }
+
+This CSS Grid declaration creates a fully responsive layout:
+
+  - auto-fit: Creates as many columns as will fit in the container
+  - minmax(280px, 1fr): Each column is at least 280px wide and grows to fill
+    available space equally
+  - gap: 20px: Consistent spacing between cards
+
+On a 1200px-wide viewport, this produces approximately 3 columns (280px each
+with gaps). On a 600px-wide viewport, it produces 2 columns. On a 320px-wide
+mobile viewport, it collapses to 1 column. No media queries are needed.
+
+18.2 FLEXBOX FOR TOOLBAR
+
+  .toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+
+The toolbar uses Flexbox with flex-wrap: wrap. On wide screens, the search
+field and Add button sit side by side. On narrow screens, they wrap to
+separate lines. The gap property ensures consistent spacing regardless of
+wrapping.
+
+18.3 DIALOG RESPONSIVENESS
+
+  width: '500px', maxWidth: '90vw'
+
+The dialog has a fixed width of 500px but limits to 90% of the viewport width
+on smaller screens. This ensures the dialog is readable on desktop while
+remaining accessible on mobile devices.
+
+18.4 CONTAINER CONSTRAINT
+
+  .dashboard-container {
+    padding: 24px;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+The main container constrains the content to a maximum of 1200px and centers
+it horizontally. This prevents content from stretching too wide on ultrawide
+monitors while maintaining comfortable reading width.
+
+
+================================================================================
+19. ACCESSIBILITY AND UI BEST PRACTICES
+================================================================================
+
+19.1 ANGULAR MATERIAL ACCESSIBILITY
+
+Angular Material components are built with accessibility as a core feature:
+
+  - All interactive elements have appropriate ARIA roles
+  - MatButton generates <button> elements with proper type attributes
+  - MatFormField associates labels with inputs via the 'for' attribute
+  - MatDialog implements focus trapping (Tab key cycles within the dialog)
+  - MatDialog restores focus to the triggering element on close
+  - Keyboard navigation: Escape key closes dialogs
+  - Color contrast ratios meet WCAG 2.1 AA standards
+
+19.2 SEMANTIC HTML
+
+The application uses semantic HTML elements:
+
+  - <h3> for employee names (proper heading hierarchy)
+  - <p> for descriptive text
+  - <strong> for label emphasis
+  - <form> element with proper (ngSubmit) handler
+  - <button> elements with type="submit" and type="button" differentiation
+  - <input> elements with appropriate type attributes (text, email, number)
+
+19.3 FORM ACCESSIBILITY
+
+  - Each input has an associated <mat-label> that floats when the input is
+    focused, providing visual context
+  - Error messages are rendered in <mat-error> elements that are announced
+    by screen readers when validation fails
+  - The placeholder attribute provides additional input guidance
+  - The disabled state on the submit button prevents invalid submissions
+  - The novalidate attribute on the form element prevents browser-native
+    validation from conflicting with Angular's validation
+
+19.4 KEYBOARD NAVIGATION
+
+  - All buttons and inputs are focusable via Tab key
+  - Material icon buttons have proper focus indicators
+  - The dialog can be closed with the Escape key
+  - Form submission can be triggered with the Enter key
+
+
+================================================================================
+20. BUILD AND DEPLOYMENT
+================================================================================
+
+20.1 DEVELOPMENT BUILD
+
+  ng serve
+
+This command compiles the application in development mode with:
+  - Source maps for debugging
+  - No optimization or minification
+  - Hot module replacement for live reloading
+  - Served at http://localhost:4200
+
+20.2 PRODUCTION BUILD
+
+  ng build --configuration production
+
+This command creates an optimized production build in the dist/ folder:
+
+  dist/employee-management-dashboard/
+  ├── browser/
+  │   ├── index.html
+  │   ├── main-XXXXXXXX.js       (application code, tree-shaken)
+  │   ├── chunk-XXXXXXXX.js      (shared chunks)
+  │   ├── styles-XXXXXXXX.css    (compiled and minified CSS)
+  │   └── favicon.ico
+
+Production build optimizations include:
+  - Tree-shaking (removes unused code)
+  - Ahead-of-Time (AOT) compilation (pre-compiles templates)
+  - Code minification and uglification
+  - Content hashing for cache busting (XXXXXXXX in filenames)
+  - Bundle splitting for optimal loading
+
+Build output statistics:
+  - Main bundle: ~405 KB (raw), ~83 KB (gzipped)
+  - Shared chunk: ~158 KB (raw), ~47 KB (gzipped)
+  - Styles: ~104 KB (raw), ~8 KB (gzipped)
+  - Total initial: ~667 KB (raw), ~137 KB (gzipped)
+
+20.3 DEPLOYMENT OPTIONS
+
+Local Development:
+  Terminal 1: cd server && npm start    (backend on port 3000)
+  Terminal 2: ng serve                  (frontend on port 4200)
+
+Docker Deployment:
+  docker-compose up --build
+
+  This builds and starts both services:
+  - Backend: Node.js + Express on port 3000
+  - Frontend: Nginx serving Angular build on port 80
+  - Nginx proxies /api/* requests to the backend
+  - SQLite database persisted via Docker volume
+
+Static Hosting:
+  The dist/ folder can be deployed to any static hosting service (Netlify,
+  Vercel, AWS S3, GitHub Pages) with a backend API hosted separately.
+
+
+================================================================================
+21. FUTURE IMPROVEMENTS
+================================================================================
+
+21.1 PAGINATION
+
+For large datasets, pagination would limit the number of employees rendered
+per page. This could be implemented using Angular Material's MatPaginator
+component combined with server-side pagination in the Express API (LIMIT and
+OFFSET SQL clauses).
+
+21.2 SORTING
+
+Column-based sorting could be added using Angular Material's MatSort directive.
+Server-side sorting would add ORDER BY clauses to SQL queries based on the
+selected column and direction.
+
+21.3 ADVANCED SEARCH
+
+The current search pipe filters by name only. An advanced search feature could
+filter across all fields (name, email, role, department, salary range) with
+dedicated filter controls.
+
+21.4 AUTHENTICATION AND AUTHORIZATION
+
+The current auth interceptor adds a mock token. A real implementation would
+include:
+  - Login/registration forms
+  - JWT token management with refresh tokens
+  - Route guards for protected routes
+  - Role-based access control (admin vs read-only)
+
+21.5 UNIT AND INTEGRATION TESTING
+
+Comprehensive test coverage using Angular's TestBed and Vitest:
+  - Component tests with mocked services
+  - Service tests with mocked HttpClient
+  - Pipe and directive unit tests
+  - Integration tests for CRUD flows
+  - End-to-end tests with Playwright or Cypress
+
+21.6 STATE MANAGEMENT UPGRADE
+
+For larger applications, the BehaviorSubject pattern could be replaced with
+a dedicated state management library such as NgRx (Redux pattern) or
+Angular Signals (available in Angular 17+) for more structured state management
+with actions, reducers, and selectors.
+
+21.7 ERROR HANDLING UI
+
+Currently, errors are logged to the console. A production application would
+display user-friendly error messages via Angular Material snackbar
+notifications (MatSnackBar) and implement retry logic for failed HTTP requests.
+
+21.8 FORM ENHANCEMENTS
+
+  - Dropdown select for Department and Role fields instead of free text
+  - Date picker for hire date
+  - Profile image upload
+  - Multi-step wizard form for complex employee onboarding
+
+
+================================================================================
+22. CONCLUSION
+================================================================================
+
+22.1 TECHNICAL SUMMARY
+
+The Employee Management Dashboard is a full-stack web application that
+demonstrates modern Angular development practices. The frontend is built with
+Angular 17's standalone component architecture, eliminating NgModule complexity
+while maintaining full type safety through TypeScript interfaces.
+
+The reactive programming model, centered on RxJS BehaviorSubjects and the
+async pipe, ensures that data flows unidirectionally from the EmployeeService
+through Observable streams to the template. This eliminates manual DOM
+manipulation, prevents memory leaks through automatic subscription management,
+and guarantees that the UI always reflects the current application state.
+
+Angular Material provides a cohesive, accessible, and visually consistent UI
+that follows Material Design specifications. The MatDialog overlay system
+replaces custom positioning logic with the CDK's robust overlay infrastructure.
+Reactive Forms with FormBuilder and Validators provide type-safe, testable
+form handling with granular validation control.
+
+Custom pipes and directives extend Angular's template capabilities. The
+EmployeeSearchPipe provides real-time name-based filtering, while the
+HighlightSalaryDirective applies conditional visual styling through
+Renderer2-based DOM manipulation.
+
+The backend REST API, built with Express and SQLite, provides persistent data
+storage with proper HTTP semantics, input validation, and error handling. The
+Docker Compose configuration enables single-command deployment of the entire
+stack.
+
+22.2 ARCHITECTURAL SCALABILITY
+
+The architecture is designed for scalability:
+
+  - Standalone components can be lazy-loaded individually via the router
+  - The service layer abstracts data access, allowing backend replacement
+    without modifying components
+  - BehaviorSubject state management can be upgraded to NgRx or Signals
+  - The REST API design supports horizontal scaling behind a load balancer
+  - Docker containerization enables cloud deployment on any container platform
+  - Component-scoped CSS prevents style conflicts as the application grows
+  - TypeScript interfaces ensure type safety across team boundaries
+
+22.3 ANGULAR CONCEPTS DEMONSTRATED
+
+  ✓ Standalone Components (no NgModules)
+  ✓ Dependency Injection (constructor injection, inject() function)
+  ✓ Reactive Forms (FormBuilder, FormGroup, Validators)
+  ✓ Custom Pipes (EmployeeSearchPipe with PipeTransform)
+  ✓ Custom Directives (HighlightSalaryDirective with Renderer2)
+  ✓ Lifecycle Hooks (OnInit, OnDestroy, OnChanges)
+  ✓ Angular Material UI (Toolbar, Card, Dialog, Form Fields, Buttons, Icons)
+  ✓ MatDialog Overlay System (MAT_DIALOG_DATA, MatDialogRef, CDK overlay)
+  ✓ RxJS Observables (BehaviorSubject, Observable, Subscription, operators)
+  ✓ BehaviorSubject State Management (single source of truth pattern)
+  ✓ HTTP Client (GET, POST, PUT, DELETE with functional interceptors)
+  ✓ Template Syntax (*ngIf, *ngFor, async pipe, event/property binding)
+  ✓ Two-Way Binding ([(ngModel)] for search input)
+  ✓ Smart/Presentational Component Pattern
+  ✓ Immutable State Updates (spread operator for new references)
+  ✓ Responsive Design (CSS Grid, Flexbox, viewport-relative units)
+
+================================================================================
+END OF DOCUMENT
+================================================================================
+
+Document:     TECHNICAL_DOCUMENTATION.txt
+Project:      Employee Management Dashboard
+Author:       John Jomi
+Repository:   https://github.com/JohnJomi/L-TProject3
+Generated:    March 9, 2026

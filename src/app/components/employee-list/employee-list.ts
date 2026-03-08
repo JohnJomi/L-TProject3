@@ -75,12 +75,26 @@ export class EmployeeList implements OnInit, OnDestroy {
 
   onFormSubmit(employee: Employee) {
     if (this.editingEmployee) {
-      this.employeeService.updateEmployee(employee).subscribe(() => {
-        this.editingEmployee = null;
+      // For edit: subscribe to update operation and close form when done
+      this.employeeService.updateEmployee(employee).subscribe({
+        next: () => {
+          this.editingEmployee = null;
+          this.showAddForm = false;
+        },
+        error: (error) => {
+          console.error('Error updating employee:', error);
+        }
       });
     } else {
-      this.employeeService.addEmployee(employee).subscribe(() => {
-        this.employeeService.resetAddForm();
+      // For add: subscribe to add operation and close form when done
+      this.employeeService.addEmployee(employee).subscribe({
+        next: () => {
+          // Form was successfully added, close the form
+          this.employeeService.resetAddForm();
+        },
+        error: (error) => {
+          console.error('Error adding employee:', error);
+        }
       });
     }
   }
