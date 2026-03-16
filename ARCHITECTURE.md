@@ -31,7 +31,7 @@ This document explains the architectural decisions and design patterns used in t
 
 ---
 
-## 🏛️ Architectural Patterns
+## 🏛️ Architectural Pattern
 
 ### 1. Standalone Component Architecture
 
